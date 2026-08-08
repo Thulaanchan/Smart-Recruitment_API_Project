@@ -1,0 +1,7 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Custom override for build targets
+*.cs text diff=csharp
+*.csproj text
+*.sln text eol=crlf
