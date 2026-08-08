@@ -1,3 +1,10 @@
+using SmartRecruitmentMatchingPlatform.API.Repositories.Interfaces;
+using SmartRecruitmentMatchingPlatform.API.Repositories.Implementations;
+using SmartRecruitmentMatchingPlatform.API.Services.Interfaces;
+using SmartRecruitmentMatchingPlatform.API.Services.Implementations;
+using Microsoft.EntityFrameworkCore;
+using SmartRecruitmentMatchingPlatform.API.Data.Context;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -6,7 +13,14 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddControllers();
 
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
