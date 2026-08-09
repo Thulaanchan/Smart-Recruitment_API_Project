@@ -1,61 +1,46 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SmartRecruitmentMatchingPlatform.API.Interfaces.Services.Matching;
 
 namespace SmartRecruitmentMatchingPlatform.API.Controllers.Matching
 {
-    [ApiController]
     [Route("api/[controller]")]
+    [ApiController]
+    [Authorize]
     public class MatchingController : ControllerBase
     {
-        private readonly IMatchingService _matchingService;
-
-        public MatchingController(IMatchingService matchingService)
+        public MatchingController()
         {
             _matchingService = matchingService;
         }
 
-        // GET:
-        // api/matching/jobseeker/1/vacancy/5
-        [HttpGet("jobseeker/{jobSeekerId:int}/vacancy/{vacancyId:int}")]
-        public async Task<IActionResult> GetMatch(
-            int jobSeekerId,
-            int vacancyId)
+        // GET: api/matching
+        [HttpGet]
+        public IActionResult GetMatchingStatus()
         {
-            if (jobSeekerId <= 0 || vacancyId <= 0)
+            return Ok(new
             {
-                return BadRequest(
-                    "JobSeekerId and VacancyId must be greater than zero.");
-            }
-
-            var result = await _matchingService.GetMatchAsync(
-                jobSeekerId,
-                vacancyId);
-
-            if (result == null)
-            {
-                return NotFound(
-                    "Job seeker or vacancy could not be found.");
-            }
-
-            return Ok(result);
+                message = "Matching endpoint is working."
+            });
         }
 
-        // GET:
-        // api/matching/vacancy/5/ranked-candidates
-        [HttpGet("vacancy/{vacancyId:int}/ranked-candidates")]
-        public async Task<IActionResult> GetRankedCandidates(
-            int vacancyId)
+        // GET: api/matching/vacancy/5
+        [HttpGet("vacancy/{vacancyId:int}")]
+        public IActionResult GetMatchesByVacancy(int vacancyId)
         {
             if (vacancyId <= 0)
             {
-                return BadRequest(
-                    "VacancyId must be greater than zero.");
+                return BadRequest(new
+                {
+                    message = "Invalid vacancy ID."
+                });
             }
 
-            var candidates =
-                await _matchingService.GetRankedCandidatesAsync(vacancyId);
-
-            return Ok(candidates);
+            return Ok(new
+            {
+                vacancyId,
+                message = "Candidate matching endpoint is working."
+            });
         }
     }
 }
