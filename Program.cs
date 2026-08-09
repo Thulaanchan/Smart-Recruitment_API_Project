@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 using SmartRecruitmentMatchingPlatform.API.Data.Context;
+
 using SmartRecruitmentMatchingPlatform.Configurations;
 using SmartRecruitmentMatchingPlatform.Interfaces.Repositories.Users;
 using SmartRecruitmentMatchingPlatform.Interfaces.Services;
@@ -16,24 +17,29 @@ using SmartRecruitmentMatchingPlatform.Services.Auth;
 using SmartRecruitmentMatchingPlatform.Services.Users;
 using SmartRecruitmentMatchingPlatform.Validators.Auth;
 
+using SmartRecruitmentMatchingPlatform.API.Interfaces.Repositories.Matching;
+using SmartRecruitmentMatchingPlatform.API.Interfaces.Services.Matching;
+using SmartRecruitmentMatchingPlatform.API.Matching.Engine;
+using SmartRecruitmentMatchingPlatform.API.Matching.Filtering;
+using SmartRecruitmentMatchingPlatform.API.Matching.Ranking;
+using SmartRecruitmentMatchingPlatform.API.Repositories.Matching;
+using SmartRecruitmentMatchingPlatform.API.Services.Matching;
+
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
-
 
 // ======================================
 // Controllers
 // ======================================
 builder.Services.AddControllers();
 
-
 // ======================================
 // Database - TEMPORARY
-// Actual SQL Server configuration will
-// be added after merging all modules.
+// Real SQL Server options will be added
+// after the shared database is finalized.
 // ======================================
 builder.Services.AddDbContext<ApplicationDbContext>();
-
 
 // ======================================
 // JWT Settings
@@ -53,7 +59,6 @@ if (string.IsNullOrWhiteSpace(jwtSettings.Key))
     throw new InvalidOperationException(
         "JWT Key is missing.");
 }
-
 
 // ======================================
 // JWT Authentication
@@ -89,15 +94,13 @@ builder.Services
             };
     });
 
-
 // ======================================
 // Authorization
 // ======================================
 builder.Services.AddAuthorization();
 
-
 // ======================================
-// Repositories
+// Authentication Repositories
 // ======================================
 builder.Services.AddScoped<
     IUserRepository,
@@ -107,9 +110,8 @@ builder.Services.AddScoped<
     IRefreshTokenRepository,
     RefreshTokenRepository>();
 
-
 // ======================================
-// Services
+// Authentication Services
 // ======================================
 builder.Services.AddScoped<
     IAuthService,
@@ -123,14 +125,11 @@ builder.Services.AddScoped<
     IUserService,
     UserService>();
 
-
 // ======================================
 // Password Hashing
 // ======================================
-builder.Services.AddScoped<
-    IPasswordHasher<User>,
-    PasswordHasher<User>>();
-
+// Keep the exact PasswordHasher registration
+// used by the Authentication branch here.
 
 // ======================================
 // FluentValidation
@@ -144,9 +143,23 @@ builder.Services.AddScoped<
     LoginValidator>();
 
 builder.Services.AddScoped<
-    IValidator<ChangePasswordDto>,
+    IValidator<ChangePasswordRequestDto>,
     ChangePasswordValidator>();
 
+// ======================================
+// Matching Module
+// ======================================
+builder.Services.AddScoped<
+    IMatchingRepository,
+    MatchingRepository>();
+
+builder.Services.AddScoped<
+    IMatchingService,
+    MatchingService>();
+
+builder.Services.AddScoped<MatchingEngine>();
+builder.Services.AddScoped<CandidateRanker>();
+builder.Services.AddScoped<JobFilter>();
 
 // ======================================
 // Swagger
@@ -154,9 +167,7 @@ builder.Services.AddScoped<
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-
 var app = builder.Build();
-
 
 // ======================================
 // HTTP Request Pipeline
@@ -169,10 +180,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-
-// Authentication MUST be before Authorization
+// IMPORTANT:
+// Authentication must come before Authorization.
 app.UseAuthentication();
-
 app.UseAuthorization();
 
 app.MapControllers();
