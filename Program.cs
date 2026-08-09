@@ -6,17 +6,25 @@ using Microsoft.IdentityModel.Tokens;
 
 using SmartRecruitmentMatchingPlatform.API.Data.Context;
 
+// Job Seeker
+using SmartRecruitmentMatchingPlatform.API.Interfaces.Repositories.JobSeekers;
+using SmartRecruitmentMatchingPlatform.API.Interfaces.Services.JobSeekers;
+using SmartRecruitmentMatchingPlatform.API.Repositories.JobSeekers;
+using SmartRecruitmentMatchingPlatform.API.Services.JobSeekers;
+using SmartRecruitmentMatchingPlatform.API.Mappings.JobSeekers;
+using SmartRecruitmentMatchingPlatform.API.Validators.JobSeekers;
+
+// Authentication
 using SmartRecruitmentMatchingPlatform.Configurations;
 using SmartRecruitmentMatchingPlatform.Interfaces.Repositories.Users;
 using SmartRecruitmentMatchingPlatform.Interfaces.Services;
 using SmartRecruitmentMatchingPlatform.Interfaces.Services.Auth;
-using SmartRecruitmentMatchingPlatform.Models.DTOs.Auth;
 using SmartRecruitmentMatchingPlatform.Models.Entities.Users;
 using SmartRecruitmentMatchingPlatform.Repositories.Users;
 using SmartRecruitmentMatchingPlatform.Services.Auth;
 using SmartRecruitmentMatchingPlatform.Services.Users;
-using SmartRecruitmentMatchingPlatform.Validators.Auth;
 
+// Matching
 using SmartRecruitmentMatchingPlatform.API.Interfaces.Repositories.Matching;
 using SmartRecruitmentMatchingPlatform.API.Interfaces.Services.Matching;
 using SmartRecruitmentMatchingPlatform.API.Matching.Engine;
@@ -35,11 +43,19 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
 // ======================================
-// Database - TEMPORARY
-// Real SQL Server options will be added
-// after the shared database is finalized.
+// Swagger
 // ======================================
-builder.Services.AddDbContext<ApplicationDbContext>();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+// ======================================
+// Database
+// ======================================
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection")
+    )
+);
 
 // ======================================
 // JWT Settings
@@ -61,7 +77,7 @@ if (string.IsNullOrWhiteSpace(jwtSettings.Key))
 }
 
 // ======================================
-// JWT Authentication
+// Authentication
 // ======================================
 builder.Services
     .AddAuthentication(options =>
@@ -87,16 +103,12 @@ builder.Services
 
                 IssuerSigningKey =
                     new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(
-                            jwtSettings.Key)),
+                        Encoding.UTF8.GetBytes(jwtSettings.Key)),
 
                 ClockSkew = TimeSpan.Zero
             };
     });
 
-// ======================================
-// Authorization
-// ======================================
 builder.Services.AddAuthorization();
 
 // ======================================
@@ -128,23 +140,48 @@ builder.Services.AddScoped<
 // ======================================
 // Password Hashing
 // ======================================
-// Keep the exact PasswordHasher registration
-// used by the Authentication branch here.
+builder.Services.AddScoped<
+    IPasswordHasher<User>,
+    PasswordHasher<User>>();
+
+// ======================================
+// Job Seeker Repositories
+// ======================================
+builder.Services.AddScoped<
+    IJobSeekerRepository,
+    JobSeekerRepository>();
+
+builder.Services.AddScoped<
+    IJobSeekerProfileRepository,
+    JobSeekerProfileRepository>();
+
+builder.Services.AddScoped<
+    ICVRepository,
+    CVRepository>();
+
+// ======================================
+// Job Seeker Services
+// ======================================
+builder.Services.AddScoped<
+    IJobSeekerProfileService,
+    JobSeekerProfileService>();
+
+builder.Services.AddScoped<
+    ICVService,
+    CVService>();
+
+// ======================================
+// AutoMapper
+// ======================================
+builder.Services.AddAutoMapper(
+    typeof(JobSeekerMappingProfile).Assembly);
 
 // ======================================
 // FluentValidation
+// Scans this project's assembly for validators
 // ======================================
-builder.Services.AddScoped<
-    IValidator<RegisterRequestDto>,
-    RegisterValidator>();
-
-builder.Services.AddScoped<
-    IValidator<LoginRequestDto>,
-    LoginValidator>();
-
-builder.Services.AddScoped<
-    IValidator<ChangePasswordRequestDto>,
-    ChangePasswordValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<
+    CreateJobSeekerProfileValidator>();
 
 // ======================================
 // Matching Module
@@ -162,11 +199,8 @@ builder.Services.AddScoped<CandidateRanker>();
 builder.Services.AddScoped<JobFilter>();
 
 // ======================================
-// Swagger
+// Build Application
 // ======================================
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
 var app = builder.Build();
 
 // ======================================
@@ -180,8 +214,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// IMPORTANT:
-// Authentication must come before Authorization.
+// Authentication MUST be before Authorization
 app.UseAuthentication();
 app.UseAuthorization();
 

@@ -1,6 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
-using SmartRecruitmentMatchingPlatform.API.Models.Entities;
+using Microsoft.EntityFrameworkCore;
+
 using SmartRecruitmentMatchingPlatform.API.Models.Entities.Employers;
+using SmartRecruitmentMatchingPlatform.API.Models.Entities.Users;
+using SmartRecruitmentMatchingPlatform.API.Models.Entities.Vacancies;
+using SmartRecruitmentMatchingPlatform.API.Models.Entities.Applications;
 
 namespace SmartRecruitmentMatchingPlatform.API.Data.Context
 {
@@ -12,7 +15,17 @@ namespace SmartRecruitmentMatchingPlatform.API.Data.Context
         {
         }
 
-        // Employer Module
+        // =====================================
+        // Authentication / User Module
+        // =====================================
+        public DbSet<User> Users { get; set; } = null!;
+
+        public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
+
+
+        // =====================================
+        // Employer / Vacancy Module
+        // =====================================
         public DbSet<Employer> Employers { get; set; } = null!;
 
         public DbSet<Vacancy> Vacancies { get; set; } = null!;
@@ -21,22 +34,22 @@ namespace SmartRecruitmentMatchingPlatform.API.Data.Context
 
         public DbSet<Application> Applications { get; set; } = null!;
 
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // -------------------------
+            // =====================================
             // User configuration
-            // -------------------------
-
+            // =====================================
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Email)
                 .IsUnique();
 
-            // -------------------------
-            // RefreshToken configuration
-            // -------------------------
 
+            // =====================================
+            // RefreshToken configuration
+            // =====================================
             modelBuilder.Entity<RefreshToken>()
                 .HasOne(r => r.User)
                 .WithMany()
@@ -47,8 +60,10 @@ namespace SmartRecruitmentMatchingPlatform.API.Data.Context
                 .HasIndex(r => r.Token)
                 .IsUnique();
 
-            // Apply other entity configurations
-            // from the project automatically
+
+            // =====================================
+            // Apply IEntityTypeConfiguration classes
+            // =====================================
             modelBuilder.ApplyConfigurationsFromAssembly(
                 typeof(ApplicationDbContext).Assembly);
         }
