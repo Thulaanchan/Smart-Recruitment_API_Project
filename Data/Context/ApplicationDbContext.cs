@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SmartRecruitmentMatchingPlatform.Models.Entities.Users;
+using SmartRecruitmentMatchingPlatform.API.Models.Entities;
+using SmartRecruitmentMatchingPlatform.API.Models.Entities.Employers;
 
 namespace SmartRecruitmentMatchingPlatform.API.Data.Context
 {
@@ -11,14 +12,14 @@ namespace SmartRecruitmentMatchingPlatform.API.Data.Context
         {
         }
 
-        // =========================
-        // Authentication / Users
-        // =========================
+        // Employer Module
+        public DbSet<Employer> Employers { get; set; } = null!;
 
-        public DbSet<User> Users { get; set; }
+        public DbSet<Vacancy> Vacancies { get; set; } = null!;
 
-        public DbSet<RefreshToken> RefreshTokens { get; set; }
+        public DbSet<VacancySkill> VacancySkills { get; set; } = null!;
 
+        public DbSet<Application> Applications { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
