@@ -6,35 +6,66 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <!-- ====================================== -->
+  <!-- NuGet Packages -->
+  <!-- ====================================== -->
   <ItemGroup>
 
     <!-- Job Seeker -->
-    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
-    <PackageReference Include="FluentValidation" Version="12.1.1" />
-    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
-    <PackageReference Include="Mediarq" Version="1.5.1" />
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection"
+                      Version="8.1.1" />
+
+    <PackageReference Include="FluentValidation"
+                      Version="12.1.1" />
+
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions"
+                      Version="12.1.1" />
+
+    <PackageReference Include="Mediarq"
+                      Version="1.5.1" />
 
     <!-- Authentication -->
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.29" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer"
+                      Version="8.0.29" />
 
     <!-- Entity Framework Core -->
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.29">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design"
+                      Version="8.0.29">
       <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <IncludeAssets>
+        runtime; build; native; contentfiles; analyzers; buildtransitive
+      </IncludeAssets>
     </PackageReference>
 
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.29" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer"
+                      Version="8.0.29" />
 
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.29">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools"
+                      Version="8.0.29">
       <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <IncludeAssets>
+        runtime; build; native; contentfiles; analyzers; buildtransitive
+      </IncludeAssets>
     </PackageReference>
 
     <!-- Swagger -->
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+    <PackageReference Include="Swashbuckle.AspNetCore"
+                      Version="6.6.2" />
 
   </ItemGroup>
 
+
+  <!-- ====================================== -->
+  <!-- Exclude nested test source files -->
+  <!-- ====================================== -->
+  <ItemGroup>
+    <Compile Remove="SmartRecruitmentMatchingPlatform.Tests\**\*.cs" />
+  </ItemGroup>
+
+
+  <!-- ====================================== -->
+  <!-- Project Folder Structure -->
+  <!-- ====================================== -->
   <ItemGroup>
 
     <!-- Configurations -->
@@ -199,11 +230,12 @@
     <Folder Include="Validators\Users\" />
     <Folder Include="Validators\Vacancies\" />
 
-    <!-- Frontend -->
+    <!-- Frontend Assets -->
     <Folder Include="wwwroot\assets\icons\" />
     <Folder Include="wwwroot\assets\images\" />
     <Folder Include="wwwroot\assets\logos\" />
 
+    <!-- Frontend CSS -->
     <Folder Include="wwwroot\css\admin\" />
     <Folder Include="wwwroot\css\auth\" />
     <Folder Include="wwwroot\css\common\" />
@@ -211,6 +243,7 @@
     <Folder Include="wwwroot\css\jobseeker\" />
     <Folder Include="wwwroot\css\matching\" />
 
+    <!-- Frontend JavaScript -->
     <Folder Include="wwwroot\js\admin\" />
     <Folder Include="wwwroot\js\api\" />
     <Folder Include="wwwroot\js\auth\" />

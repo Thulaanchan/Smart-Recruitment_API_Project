@@ -1,4 +1,5 @@
 using FluentValidation;
+
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -6,7 +7,9 @@ using Microsoft.IdentityModel.Tokens;
 
 using SmartRecruitmentMatchingPlatform.API.Data.Context;
 
+// ======================================
 // Job Seeker
+// ======================================
 using SmartRecruitmentMatchingPlatform.API.Interfaces.Repositories.JobSeekers;
 using SmartRecruitmentMatchingPlatform.API.Interfaces.Services.JobSeekers;
 using SmartRecruitmentMatchingPlatform.API.Repositories.JobSeekers;
@@ -14,7 +17,9 @@ using SmartRecruitmentMatchingPlatform.API.Services.JobSeekers;
 using SmartRecruitmentMatchingPlatform.API.Mappings.JobSeekers;
 using SmartRecruitmentMatchingPlatform.API.Validators.JobSeekers;
 
+// ======================================
 // Authentication
+// ======================================
 using SmartRecruitmentMatchingPlatform.Configurations;
 using SmartRecruitmentMatchingPlatform.Interfaces.Repositories.Users;
 using SmartRecruitmentMatchingPlatform.Interfaces.Services;
@@ -24,7 +29,9 @@ using SmartRecruitmentMatchingPlatform.Repositories.Users;
 using SmartRecruitmentMatchingPlatform.Services.Auth;
 using SmartRecruitmentMatchingPlatform.Services.Users;
 
+// ======================================
 // Matching
+// ======================================
 using SmartRecruitmentMatchingPlatform.API.Interfaces.Repositories.Matching;
 using SmartRecruitmentMatchingPlatform.API.Interfaces.Services.Matching;
 using SmartRecruitmentMatchingPlatform.API.Matching.Engine;
@@ -33,14 +40,25 @@ using SmartRecruitmentMatchingPlatform.API.Matching.Ranking;
 using SmartRecruitmentMatchingPlatform.API.Repositories.Matching;
 using SmartRecruitmentMatchingPlatform.API.Services.Matching;
 
+// ======================================
+// Admin + Notifications
+// ======================================
+using SmartRecruitmentMatchingPlatform.API.Repositories.Interfaces;
+using SmartRecruitmentMatchingPlatform.API.Repositories.Implementations;
+using SmartRecruitmentMatchingPlatform.API.Services.Interfaces;
+using SmartRecruitmentMatchingPlatform.API.Services.Implementations;
+
 using System.Text;
 
+
 var builder = WebApplication.CreateBuilder(args);
+
 
 // ======================================
 // Controllers
 // ======================================
 builder.Services.AddControllers();
+
 
 // ======================================
 // Swagger
@@ -48,14 +66,17 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+
 // ======================================
 // Database
 // ======================================
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
+{
     options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection")
-    )
-);
+        builder.Configuration.GetConnectionString(
+            "DefaultConnection"));
+});
+
 
 // ======================================
 // JWT Settings
@@ -75,6 +96,7 @@ if (string.IsNullOrWhiteSpace(jwtSettings.Key))
     throw new InvalidOperationException(
         "JWT Key is missing.");
 }
+
 
 // ======================================
 // Authentication
@@ -103,13 +125,19 @@ builder.Services
 
                 IssuerSigningKey =
                     new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(jwtSettings.Key)),
+                        Encoding.UTF8.GetBytes(
+                            jwtSettings.Key)),
 
                 ClockSkew = TimeSpan.Zero
             };
     });
 
+
+// ======================================
+// Authorization
+// ======================================
 builder.Services.AddAuthorization();
+
 
 // ======================================
 // Authentication Repositories
@@ -121,6 +149,7 @@ builder.Services.AddScoped<
 builder.Services.AddScoped<
     IRefreshTokenRepository,
     RefreshTokenRepository>();
+
 
 // ======================================
 // Authentication Services
@@ -137,12 +166,14 @@ builder.Services.AddScoped<
     IUserService,
     UserService>();
 
+
 // ======================================
 // Password Hashing
 // ======================================
 builder.Services.AddScoped<
     IPasswordHasher<User>,
     PasswordHasher<User>>();
+
 
 // ======================================
 // Job Seeker Repositories
@@ -159,6 +190,7 @@ builder.Services.AddScoped<
     ICVRepository,
     CVRepository>();
 
+
 // ======================================
 // Job Seeker Services
 // ======================================
@@ -170,18 +202,20 @@ builder.Services.AddScoped<
     ICVService,
     CVService>();
 
+
 // ======================================
 // AutoMapper
 // ======================================
 builder.Services.AddAutoMapper(
     typeof(JobSeekerMappingProfile).Assembly);
 
+
 // ======================================
 // FluentValidation
-// Scans this project's assembly for validators
 // ======================================
 builder.Services.AddValidatorsFromAssemblyContaining<
     CreateJobSeekerProfileValidator>();
+
 
 // ======================================
 // Matching Module
@@ -195,13 +229,41 @@ builder.Services.AddScoped<
     MatchingService>();
 
 builder.Services.AddScoped<MatchingEngine>();
+
 builder.Services.AddScoped<CandidateRanker>();
+
 builder.Services.AddScoped<JobFilter>();
+
+
+// ======================================
+// Admin Module
+// ======================================
+builder.Services.AddScoped<
+    IAdminRepository,
+    AdminRepository>();
+
+builder.Services.AddScoped<
+    IAdminService,
+    AdminService>();
+
+
+// ======================================
+// Notification Module
+// ======================================
+builder.Services.AddScoped<
+    INotificationRepository,
+    NotificationRepository>();
+
+builder.Services.AddScoped<
+    INotificationService,
+    NotificationService>();
+
 
 // ======================================
 // Build Application
 // ======================================
 var app = builder.Build();
+
 
 // ======================================
 // HTTP Request Pipeline
@@ -214,10 +276,19 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// Authentication MUST be before Authorization
+
+// ======================================
+// Authentication / Authorization
+// ======================================
 app.UseAuthentication();
+
 app.UseAuthorization();
 
+
+// ======================================
+// Controllers
+// ======================================
 app.MapControllers();
+
 
 app.Run();
