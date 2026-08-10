@@ -1,20 +1,28 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
 // ======================================
-// Authentication
+// Authentication / Users
 // ======================================
-using SmartRecruitmentMatchingPlatform.Models.Entities.Users;
+using SmartRecruitmentMatchingPlatform.API.Models.Entities.Users;
 
 // ======================================
-// Employer / Vacancy / Application
+// Employer
 // ======================================
-using SmartRecruitmentMatchingPlatform.API.Models.Entities;
 using SmartRecruitmentMatchingPlatform.API.Models.Entities.Employers;
 
 // ======================================
-// Job Seeker aliases
-// These aliases prevent conflict with the
-// duplicate JobSeeker class in Models.Entities
+// Vacancy
+// ======================================
+using SmartRecruitmentMatchingPlatform.API.Models.Entities.Vacancies;
+
+// ======================================
+// Applications
+// ======================================
+using SmartRecruitmentMatchingPlatform.API.Models.Entities.Applications;
+
+// ======================================
+// Job Seeker
+// Aliases avoid duplicate JobSeeker conflict
 // ======================================
 using JobSeekerEntity =
     SmartRecruitmentMatchingPlatform.API.Models.Entities.JobSeekers.JobSeeker;
@@ -47,7 +55,7 @@ namespace SmartRecruitmentMatchingPlatform.API.Data.Context
 
 
         // ======================================
-        // Authentication Module
+        // Authentication / User Module
         // ======================================
 
         public DbSet<User> Users { get; set; } = null!;
@@ -59,7 +67,8 @@ namespace SmartRecruitmentMatchingPlatform.API.Data.Context
         // Job Seeker Module
         // ======================================
 
-        public DbSet<JobSeekerEntity> JobSeekers { get; set; } = null!;
+        public DbSet<JobSeekerEntity> JobSeekers { get; set; }
+            = null!;
 
         public DbSet<JobSeekerProfileEntity> JobSeekerProfiles
         {
@@ -67,11 +76,14 @@ namespace SmartRecruitmentMatchingPlatform.API.Data.Context
             set;
         } = null!;
 
-        public DbSet<CVEntity> CVs { get; set; } = null!;
+        public DbSet<CVEntity> CVs { get; set; }
+            = null!;
 
-        public DbSet<EducationEntity> Educations { get; set; } = null!;
+        public DbSet<EducationEntity> Educations { get; set; }
+            = null!;
 
-        public DbSet<ExperienceEntity> Experiences { get; set; } = null!;
+        public DbSet<ExperienceEntity> Experiences { get; set; }
+            = null!;
 
         public DbSet<JobSeekerSkillEntity> JobSeekerSkills
         {
@@ -81,16 +93,30 @@ namespace SmartRecruitmentMatchingPlatform.API.Data.Context
 
 
         // ======================================
-        // Employer / Vacancy Module
+        // Employer Module
         // ======================================
 
-        public DbSet<Employer> Employers { get; set; } = null!;
+        public DbSet<Employer> Employers { get; set; }
+            = null!;
 
-        public DbSet<Vacancy> Vacancies { get; set; } = null!;
 
-        public DbSet<VacancySkill> VacancySkills { get; set; } = null!;
+        // ======================================
+        // Vacancy Module
+        // ======================================
 
-        public DbSet<Application> Applications { get; set; } = null!;
+        public DbSet<Vacancy> Vacancies { get; set; }
+            = null!;
+
+        public DbSet<VacancySkill> VacancySkills { get; set; }
+            = null!;
+
+
+        // ======================================
+        // Application Module
+        // ======================================
+
+        public DbSet<Application> Applications { get; set; }
+            = null!;
 
 
         // ======================================
@@ -113,7 +139,7 @@ namespace SmartRecruitmentMatchingPlatform.API.Data.Context
 
 
             // ======================================
-            // Refresh Token Configuration
+            // RefreshToken Configuration
             // ======================================
 
             modelBuilder.Entity<RefreshToken>()
@@ -140,7 +166,7 @@ namespace SmartRecruitmentMatchingPlatform.API.Data.Context
 
 
             // ======================================
-            // Apply Other Entity Configurations
+            // Apply all Entity Configurations
             // ======================================
 
             modelBuilder.ApplyConfigurationsFromAssembly(

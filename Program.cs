@@ -9,26 +9,26 @@ using Microsoft.OpenApi.Models;
 using SmartRecruitmentMatchingPlatform.API.Data.Context;
 
 // ======================================
-// Authentication
-// ======================================
-using SmartRecruitmentMatchingPlatform.Configurations;
-using SmartRecruitmentMatchingPlatform.Interfaces.Repositories.Users;
-using SmartRecruitmentMatchingPlatform.Interfaces.Services;
-using SmartRecruitmentMatchingPlatform.Interfaces.Services.Auth;
-using SmartRecruitmentMatchingPlatform.Models.DTOs.Auth;
-using SmartRecruitmentMatchingPlatform.Models.Entities.Users;
-using SmartRecruitmentMatchingPlatform.Repositories.Users;
-using SmartRecruitmentMatchingPlatform.Services.Auth;
-using SmartRecruitmentMatchingPlatform.Services.Users;
-using SmartRecruitmentMatchingPlatform.Validators.Auth;
-
-// ======================================
 // Job Seeker
 // ======================================
 using SmartRecruitmentMatchingPlatform.API.Interfaces.Repositories.JobSeekers;
 using SmartRecruitmentMatchingPlatform.API.Interfaces.Services.JobSeekers;
 using SmartRecruitmentMatchingPlatform.API.Repositories.JobSeekers;
 using SmartRecruitmentMatchingPlatform.API.Services.JobSeekers;
+using SmartRecruitmentMatchingPlatform.API.Mappings.JobSeekers;
+using SmartRecruitmentMatchingPlatform.API.Validators.JobSeekers;
+
+// ======================================
+// Authentication
+// ======================================
+using SmartRecruitmentMatchingPlatform.Configurations;
+using SmartRecruitmentMatchingPlatform.Interfaces.Repositories.Users;
+using SmartRecruitmentMatchingPlatform.Interfaces.Services;
+using SmartRecruitmentMatchingPlatform.Interfaces.Services.Auth;
+using SmartRecruitmentMatchingPlatform.Models.Entities.Users;
+using SmartRecruitmentMatchingPlatform.Repositories.Users;
+using SmartRecruitmentMatchingPlatform.Services.Auth;
+using SmartRecruitmentMatchingPlatform.Services.Users;
 
 // ======================================
 // Matching
@@ -41,7 +41,16 @@ using SmartRecruitmentMatchingPlatform.API.Matching.Ranking;
 using SmartRecruitmentMatchingPlatform.API.Repositories.Matching;
 using SmartRecruitmentMatchingPlatform.API.Services.Matching;
 
+// ======================================
+// Admin + Notifications
+// ======================================
+using SmartRecruitmentMatchingPlatform.API.Repositories.Interfaces;
+using SmartRecruitmentMatchingPlatform.API.Repositories.Implementations;
+using SmartRecruitmentMatchingPlatform.API.Services.Interfaces;
+using SmartRecruitmentMatchingPlatform.API.Services.Implementations;
+
 using System.Text;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -53,41 +62,10 @@ builder.Services.AddControllers();
 
 
 // ======================================
-// Swagger + JWT Authorization
+// Swagger
 // ======================================
 builder.Services.AddEndpointsApiExplorer();
-
-builder.Services.AddSwaggerGen(options =>
-{
-    options.AddSecurityDefinition(
-        "Bearer",
-        new OpenApiSecurityScheme
-        {
-            Name = "Authorization",
-            Type = SecuritySchemeType.Http,
-            Scheme = "bearer",
-            BearerFormat = "JWT",
-            In = ParameterLocation.Header,
-            Description =
-                "Enter your JWT access token."
-        });
-
-    options.AddSecurityRequirement(
-        new OpenApiSecurityRequirement
-        {
-            {
-                new OpenApiSecurityScheme
-                {
-                    Reference = new OpenApiReference
-                    {
-                        Type = ReferenceType.SecurityScheme,
-                        Id = "Bearer"
-                    }
-                },
-                Array.Empty<string>()
-            }
-        });
-});
+builder.Services.AddSwaggerGen();
 
 
 // ======================================
@@ -122,7 +100,7 @@ if (string.IsNullOrWhiteSpace(jwtSettings.Key))
 
 
 // ======================================
-// JWT Authentication
+// Authentication
 // ======================================
 builder.Services
     .AddAuthentication(options =>
@@ -199,19 +177,46 @@ builder.Services.AddScoped<
 
 
 // ======================================
-// Authentication Validators
+// Job Seeker Repositories
 // ======================================
 builder.Services.AddScoped<
-    IValidator<RegisterRequestDto>,
-    RegisterValidator>();
+    IJobSeekerRepository,
+    JobSeekerRepository>();
 
 builder.Services.AddScoped<
-    IValidator<LoginRequestDto>,
-    LoginValidator>();
+    IJobSeekerProfileRepository,
+    JobSeekerProfileRepository>();
 
 builder.Services.AddScoped<
-    IValidator<ChangePasswordDto>,
-    ChangePasswordValidator>();
+    ICVRepository,
+    CVRepository>();
+
+
+// ======================================
+// Job Seeker Services
+// ======================================
+builder.Services.AddScoped<
+    IJobSeekerProfileService,
+    JobSeekerProfileService>();
+
+builder.Services.AddScoped<
+    ICVService,
+    CVService>();
+
+
+// ======================================
+// AutoMapper
+// ======================================
+builder.Services.AddAutoMapper(
+    typeof(JobSeekerMappingProfile).Assembly);
+
+
+// ======================================
+// FluentValidation
+// ======================================
+builder.Services.AddValidatorsFromAssemblyContaining<
+    CreateJobSeekerProfileValidator>();
+
 
 
 // ======================================
@@ -254,8 +259,34 @@ builder.Services.AddScoped<
     MatchingService>();
 
 builder.Services.AddScoped<MatchingEngine>();
+
 builder.Services.AddScoped<CandidateRanker>();
+
 builder.Services.AddScoped<JobFilter>();
+
+
+// ======================================
+// Admin Module
+// ======================================
+builder.Services.AddScoped<
+    IAdminRepository,
+    AdminRepository>();
+
+builder.Services.AddScoped<
+    IAdminService,
+    AdminService>();
+
+
+// ======================================
+// Notification Module
+// ======================================
+builder.Services.AddScoped<
+    INotificationRepository,
+    NotificationRepository>();
+
+builder.Services.AddScoped<
+    INotificationService,
+    NotificationService>();
 
 
 // ======================================
@@ -275,11 +306,19 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// IMPORTANT:
-// Authentication before Authorization
+
+// ======================================
+// Authentication / Authorization
+// ======================================
 app.UseAuthentication();
+
 app.UseAuthorization();
 
+
+// ======================================
+// Controllers
+// ======================================
 app.MapControllers();
+
 
 app.Run();
