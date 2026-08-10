@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 // ======================================
 // Authentication / Users
 // ======================================
-using SmartRecruitmentMatchingPlatform.API.Models.Entities.Users;
+using SmartRecruitmentMatchingPlatform.Models.Entities.Users;
 
 // ======================================
 // Employer
@@ -11,18 +11,20 @@ using SmartRecruitmentMatchingPlatform.API.Models.Entities.Users;
 using SmartRecruitmentMatchingPlatform.API.Models.Entities.Employers;
 
 // ======================================
-// Vacancy
+// Vacancy / Application
+// Vacancy, VacancySkill and Application
+// are in this root namespace
 // ======================================
-using SmartRecruitmentMatchingPlatform.API.Models.Entities.Vacancies;
+using SmartRecruitmentMatchingPlatform.API.Models.Entities;
 
 // ======================================
-// Applications
+// Notifications
 // ======================================
-using SmartRecruitmentMatchingPlatform.API.Models.Entities.Applications;
+using SmartRecruitmentMatchingPlatform.API.Models.Entities.Notifications;
 
 // ======================================
-// Job Seeker
-// Aliases avoid duplicate JobSeeker conflict
+// Job Seeker aliases
+// Prevent duplicate JobSeeker ambiguity
 // ======================================
 using JobSeekerEntity =
     SmartRecruitmentMatchingPlatform.API.Models.Entities.JobSeekers.JobSeeker;
@@ -120,6 +122,14 @@ namespace SmartRecruitmentMatchingPlatform.API.Data.Context
 
 
         // ======================================
+        // Notification Module
+        // ======================================
+
+        public DbSet<Notification> Notifications { get; set; }
+            = null!;
+
+
+        // ======================================
         // Model Configuration
         // ======================================
 
@@ -139,7 +149,7 @@ namespace SmartRecruitmentMatchingPlatform.API.Data.Context
 
 
             // ======================================
-            // RefreshToken Configuration
+            // Refresh Token Configuration
             // ======================================
 
             modelBuilder.Entity<RefreshToken>()
@@ -166,7 +176,34 @@ namespace SmartRecruitmentMatchingPlatform.API.Data.Context
 
 
             // ======================================
-            // Apply all Entity Configurations
+            // Notification Configuration
+            // ======================================
+
+            modelBuilder.Entity<Notification>()
+                .HasKey(n => n.Id);
+
+            modelBuilder.Entity<Notification>()
+                .Property(n => n.Title)
+                .IsRequired()
+                .HasMaxLength(200);
+
+            modelBuilder.Entity<Notification>()
+                .Property(n => n.Message)
+                .IsRequired()
+                .HasMaxLength(1000);
+
+            modelBuilder.Entity<Notification>()
+                .HasOne<User>()
+                .WithMany()
+                .HasForeignKey(n => n.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Notification>()
+                .HasIndex(n => n.UserId);
+
+
+            // ======================================
+            // Apply IEntityTypeConfiguration classes
             // ======================================
 
             modelBuilder.ApplyConfigurationsFromAssembly(
