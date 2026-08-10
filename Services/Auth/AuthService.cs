@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using SmartRecruitmentMatchingPlatform.Constants.Authentication;
 using SmartRecruitmentMatchingPlatform.Interfaces.Repositories.Users;
 using SmartRecruitmentMatchingPlatform.Interfaces.Services;
@@ -6,6 +6,9 @@ using SmartRecruitmentMatchingPlatform.Interfaces.Services.Auth;
 using SmartRecruitmentMatchingPlatform.Models.DTOs.Auth;
 using SmartRecruitmentMatchingPlatform.Models.Entities.Users;
 using SmartRecruitmentMatchingPlatform.Models.Enums.Users;
+
+using SmartRecruitmentMatchingPlatform.API.Interfaces.Repositories.Employers;
+using SmartRecruitmentMatchingPlatform.API.Interfaces.Repositories.JobSeekers;
 
 namespace SmartRecruitmentMatchingPlatform.Services.Auth
 {
@@ -15,17 +18,23 @@ namespace SmartRecruitmentMatchingPlatform.Services.Auth
         private readonly IRefreshTokenRepository _refreshTokenRepository;
         private readonly IJwtService _jwtService;
         private readonly IPasswordHasher<User> _passwordHasher;
+        private readonly IJobSeekerRepository _jobSeekerRepository;
+        private readonly IEmployerRepository _employerRepository;
 
         public AuthService(
             IUserRepository userRepository,
             IRefreshTokenRepository refreshTokenRepository,
             IJwtService jwtService,
-            IPasswordHasher<User> passwordHasher)
+            IPasswordHasher<User> passwordHasher,
+            IJobSeekerRepository jobSeekerRepository,
+            IEmployerRepository employerRepository)
         {
             _userRepository = userRepository;
             _refreshTokenRepository = refreshTokenRepository;
             _jwtService = jwtService;
             _passwordHasher = passwordHasher;
+            _jobSeekerRepository = jobSeekerRepository;
+            _employerRepository = employerRepository;
         }
 
         // =========================
@@ -77,8 +86,32 @@ namespace SmartRecruitmentMatchingPlatform.Services.Auth
                     dto.Password);
 
             await _userRepository.AddAsync(user);
-
             await _userRepository.SaveChangesAsync();
+
+            // Automatically create corresponding JobSeeker or Employer domain profile entity
+            if (dto.Role == UserRole.JobSeeker)
+            {
+                var jobSeeker = new SmartRecruitmentMatchingPlatform.API.Models.Entities.JobSeekers.JobSeeker
+                {
+                    UserId = user.Id,
+                    Profile = new SmartRecruitmentMatchingPlatform.API.Models.Entities.JobSeekers.JobSeekerProfile
+                    {
+                        FullName = user.FullName,
+                        CreatedAt = DateTime.UtcNow
+                    }
+                };
+                await _jobSeekerRepository.CreateAsync(jobSeeker);
+            }
+            else if (dto.Role == UserRole.Employer)
+            {
+                var employer = new SmartRecruitmentMatchingPlatform.API.Models.Entities.Employers.Employer
+                {
+                    UserId = user.Id,
+                    CompanyName = user.FullName
+                };
+                await _employerRepository.AddAsync(employer);
+                await _employerRepository.SaveChangesAsync();
+            }
 
             return await CreateAuthResponseAsync(user);
         }

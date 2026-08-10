@@ -1,11 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using SmartRecruitmentMatchingPlatform.API.Models.DTOs.Notifications;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SmartRecruitmentMatchingPlatform.API.Services.Interfaces;
 
 namespace SmartRecruitmentMatchingPlatform.API.Controllers.Notifications
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class NotificationsController : ControllerBase
     {
         private readonly INotificationService _notificationService;
@@ -16,74 +18,90 @@ namespace SmartRecruitmentMatchingPlatform.API.Controllers.Notifications
             _notificationService = notificationService;
         }
 
-        // Get all notifications for a user
-        [HttpGet("user/{userId}")]
-        public async Task<IActionResult> GetUserNotifications(int userId)
+        // Get all notifications for current authenticated user
+        [HttpGet]
+        public async Task<IActionResult> GetMyNotifications()
         {
-            var notifications =
-                await _notificationService.GetUserNotificationsAsync(userId);
+            var userId = GetCurrentUserId();
+            if (userId == null)
+            {
+                return Unauthorized(new { message = "Invalid token user." });
+            }
 
+            var notifications = await _notificationService.GetUserNotificationsAsync(userId.Value);
             return Ok(notifications);
         }
 
-        // Get notification by ID
-        [HttpGet("{id}")]
+        // Get notification by ID (secured to current user)
+        [HttpGet("{id:int}")]
         public async Task<IActionResult> GetNotificationById(int id)
         {
-            var notification =
-                await _notificationService.GetNotificationByIdAsync(id);
+            var userId = GetCurrentUserId();
+            if (userId == null)
+            {
+                return Unauthorized(new { message = "Invalid token user." });
+            }
 
-            if (notification == null)
-                return NotFound();
+            var notification = await _notificationService.GetNotificationByIdAsync(id);
+            if (notification == null || notification.UserId != userId.Value)
+            {
+                return NotFound(new { message = "Notification not found." });
+            }
 
             return Ok(notification);
         }
 
-        // Create a new notification
-        [HttpPost]
-        public async Task<IActionResult> CreateNotification(
-            [FromBody] CreateNotificationDto dto)
-        {
-            await _notificationService.CreateNotificationAsync(
-                dto.UserId,
-                dto.Title,
-                dto.Message
-            );
-
-            return Ok(new
-            {
-                message = "Notification created successfully."
-            });
-        }
-
         // Mark notification as read
-        [HttpPut("{id}/read")]
+        [HttpPut("{id:int}/read")]
         public async Task<IActionResult> MarkAsRead(int id)
         {
-            var result =
-                await _notificationService.MarkAsReadAsync(id);
+            var userId = GetCurrentUserId();
+            if (userId == null)
+            {
+                return Unauthorized(new { message = "Invalid token user." });
+            }
 
+            var notification = await _notificationService.GetNotificationByIdAsync(id);
+            if (notification == null || notification.UserId != userId.Value)
+            {
+                return NotFound(new { message = "Notification not found." });
+            }
+
+            var result = await _notificationService.MarkAsReadAsync(id);
             if (!result)
-                return NotFound();
+            {
+                return NotFound(new { message = "Notification not found." });
+            }
 
+            return Ok(new { message = "Notification marked as read." });
+        }
+
+        // Get unread notification count for current user
+        [HttpGet("unread-count")]
+        public async Task<IActionResult> GetUnreadCount()
+        {
+            var userId = GetCurrentUserId();
+            if (userId == null)
+            {
+                return Unauthorized(new { message = "Invalid token user." });
+            }
+
+            var count = await _notificationService.GetUnreadCountAsync(userId.Value);
             return Ok(new
             {
-                message = "Notification marked as read."
+                userId = userId.Value,
+                unreadCount = count
             });
         }
 
-        // Get unread notification count
-        [HttpGet("user/{userId}/unread-count")]
-        public async Task<IActionResult> GetUnreadCount(int userId)
+        private int? GetCurrentUserId()
         {
-            var count =
-                await _notificationService.GetUnreadCountAsync(userId);
-
-            return Ok(new
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (int.TryParse(userIdClaim, out int userId))
             {
-                userId = userId,
-                unreadCount = count
-            });
+                return userId;
+            }
+            return null;
         }
     }
 }

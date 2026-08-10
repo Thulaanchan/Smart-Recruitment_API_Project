@@ -1,8 +1,10 @@
-﻿namespace SmartRecruitmentMatchingPlatform.API.Models.DTOs.Matching
+namespace SmartRecruitmentMatchingPlatform.API.Models.DTOs.Matching
 {
     public class MatchingInputDto
     {
         public int JobSeekerId { get; set; }
+
+        public string JobSeekerName { get; set; } = string.Empty;
 
         public int VacancyId { get; set; }
 

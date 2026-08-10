@@ -1,4 +1,4 @@
-﻿using SmartRecruitmentMatchingPlatform.API.Models.Entities.Skills;
+using SmartRecruitmentMatchingPlatform.API.Models.Entities.Skills;
 
 namespace SmartRecruitmentMatchingPlatform.API.Models.Entities
 {
@@ -11,5 +11,7 @@ namespace SmartRecruitmentMatchingPlatform.API.Models.Entities
         public int SkillId { get; set; }
 
         public Skill? Skill { get; set; }
+
+        public Vacancy? Vacancy { get; set; }
     }
 }

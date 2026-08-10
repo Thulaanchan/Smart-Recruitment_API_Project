@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using SmartRecruitmentMatchingPlatform.API.Models.Entities;
 
@@ -31,8 +31,23 @@ namespace SmartRecruitmentMatchingPlatform.API.Configurations.EntityConfiguratio
             builder.Property(v => v.Location)
                 .HasMaxLength(200);
 
+            // Salary
+            builder.Property(v => v.Salary)
+                .HasColumnType("decimal(18,2)");
+
+            // ExperienceRequired & RequiredEducationLevel
+            builder.Property(v => v.ExperienceRequired)
+                .IsRequired();
+
+            builder.Property(v => v.RequiredEducationLevel)
+                .IsRequired();
+
             // Created Date
             builder.Property(v => v.CreatedAt)
+                .IsRequired();
+
+            // IsActive
+            builder.Property(v => v.IsActive)
                 .IsRequired();
 
             // Employer Relationship
@@ -40,6 +55,12 @@ namespace SmartRecruitmentMatchingPlatform.API.Configurations.EntityConfiguratio
                 .WithMany()
                 .HasForeignKey(v => v.EmployerId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // VacancySkills Relationship
+            builder.HasMany(v => v.VacancySkills)
+                .WithOne(vs => vs.Vacancy)
+                .HasForeignKey(vs => vs.VacancyId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

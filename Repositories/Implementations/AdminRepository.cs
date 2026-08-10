@@ -1,32 +1,41 @@
-﻿using SmartRecruitmentMatchingPlatform.API.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using SmartRecruitmentMatchingPlatform.API.Data.Context;
+using SmartRecruitmentMatchingPlatform.API.Repositories.Interfaces;
 
 namespace SmartRecruitmentMatchingPlatform.API.Repositories.Implementations
 {
     public class AdminRepository : IAdminRepository
     {
-        public Task<int> GetTotalUsersAsync()
+        private readonly ApplicationDbContext _context;
+
+        public AdminRepository(ApplicationDbContext context)
         {
-            return Task.FromResult(0);
+            _context = context;
         }
 
-        public Task<int> GetTotalJobSeekersAsync()
+        public async Task<int> GetTotalUsersAsync()
         {
-            return Task.FromResult(0);
+            return await _context.Users.CountAsync();
         }
 
-        public Task<int> GetTotalEmployersAsync()
+        public async Task<int> GetTotalJobSeekersAsync()
         {
-            return Task.FromResult(0);
+            return await _context.JobSeekers.CountAsync();
         }
 
-        public Task<int> GetTotalVacanciesAsync()
+        public async Task<int> GetTotalEmployersAsync()
         {
-            return Task.FromResult(0);
+            return await _context.Employers.CountAsync();
         }
 
-        public Task<int> GetTotalApplicationsAsync()
+        public async Task<int> GetTotalVacanciesAsync()
         {
-            return Task.FromResult(0);
+            return await _context.Vacancies.CountAsync();
+        }
+
+        public async Task<int> GetTotalApplicationsAsync()
+        {
+            return await _context.Applications.CountAsync();
         }
     }
 }

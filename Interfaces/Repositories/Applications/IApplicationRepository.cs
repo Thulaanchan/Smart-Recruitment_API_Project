@@ -1,4 +1,4 @@
-﻿using SmartRecruitmentMatchingPlatform.API.Models.Entities;
+using SmartRecruitmentMatchingPlatform.API.Models.Entities;
 
 namespace SmartRecruitmentMatchingPlatform.API.Interfaces.Repositories.Applications
 {
@@ -7,6 +7,10 @@ namespace SmartRecruitmentMatchingPlatform.API.Interfaces.Repositories.Applicati
         Task<Application?> GetByIdAsync(int applicationId);
 
         Task<IEnumerable<Application>> GetByVacancyIdAsync(int vacancyId);
+
+        Task<IEnumerable<Application>> GetByJobSeekerIdAsync(int jobSeekerId);
+
+        Task<bool> HasAppliedAsync(int jobSeekerId, int vacancyId);
 
         Task AddAsync(Application application);
 

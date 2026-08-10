@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SmartRecruitmentMatchingPlatform.API.Services.Interfaces;
 
 namespace SmartRecruitmentMatchingPlatform.API.Controllers.Admin
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Roles = "Administrator")]
     public class AdminController : ControllerBase
     {
         private readonly IAdminService _adminService;

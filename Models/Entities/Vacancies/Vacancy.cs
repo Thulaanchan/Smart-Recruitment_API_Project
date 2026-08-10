@@ -1,4 +1,4 @@
-﻿using SmartRecruitmentMatchingPlatform.API.Models.Entities.Employers;
+using SmartRecruitmentMatchingPlatform.API.Models.Entities.Employers;
 
 namespace SmartRecruitmentMatchingPlatform.API.Models.Entities
 {
@@ -14,8 +14,20 @@ namespace SmartRecruitmentMatchingPlatform.API.Models.Entities
 
         public string? Location { get; set; }
 
+        public decimal Salary { get; set; }
+
+        public int ExperienceRequired { get; set; }
+
+        public int RequiredEducationLevel { get; set; }
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+        public DateTime? ClosingDate { get; set; }
+
+        public bool IsActive { get; set; } = true;
+
         public Employer? Employer { get; set; }
+
+        public ICollection<VacancySkill> VacancySkills { get; set; } = new List<VacancySkill>();
     }
 }

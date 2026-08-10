@@ -19,6 +19,14 @@ using SmartRecruitmentMatchingPlatform.API.Mappings.JobSeekers;
 using SmartRecruitmentMatchingPlatform.API.Validators.JobSeekers;
 
 // ======================================
+// Skills
+// ======================================
+using SmartRecruitmentMatchingPlatform.API.Interfaces.Repositories.Skills;
+using SmartRecruitmentMatchingPlatform.API.Interfaces.Services.Skills;
+using SmartRecruitmentMatchingPlatform.API.Repositories.Skills;
+using SmartRecruitmentMatchingPlatform.API.Services.Skills;
+
+// ======================================
 // Authentication
 // ======================================
 using SmartRecruitmentMatchingPlatform.Configurations;
@@ -29,6 +37,32 @@ using SmartRecruitmentMatchingPlatform.Models.Entities.Users;
 using SmartRecruitmentMatchingPlatform.Repositories.Users;
 using SmartRecruitmentMatchingPlatform.Services.Auth;
 using SmartRecruitmentMatchingPlatform.Services.Users;
+
+// ======================================
+// Employer & Vacancy
+// ======================================
+using SmartRecruitmentMatchingPlatform.API.Interfaces.Repositories.Employers;
+using SmartRecruitmentMatchingPlatform.API.Repositories.Employers;
+using SmartRecruitmentMatchingPlatform.API.Interfaces.Repositories.Vacancies;
+using SmartRecruitmentMatchingPlatform.API.Repositories.Vacancies;
+using SmartRecruitmentMatchingPlatform.API.Interfaces.Services.Vacancies;
+using SmartRecruitmentMatchingPlatform.API.Services.Vacancies;
+
+// ======================================
+// Applications
+// ======================================
+using SmartRecruitmentMatchingPlatform.API.Interfaces.Repositories.Applications;
+using SmartRecruitmentMatchingPlatform.API.Repositories.Applications;
+using SmartRecruitmentMatchingPlatform.API.Interfaces.Services.Applications;
+using SmartRecruitmentMatchingPlatform.API.Services.Applications;
+
+// ======================================
+// Contact Requests
+// ======================================
+using SmartRecruitmentMatchingPlatform.API.Interfaces.Repositories.ContactRequests;
+using SmartRecruitmentMatchingPlatform.API.Repositories.ContactRequests;
+using SmartRecruitmentMatchingPlatform.API.Interfaces.Services.ContactRequests;
+using SmartRecruitmentMatchingPlatform.API.Services.ContactRequests;
 
 // ======================================
 // Matching
@@ -65,7 +99,47 @@ builder.Services.AddControllers();
 // Swagger
 // ======================================
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc(
+        "v1",
+        new OpenApiInfo
+        {
+            Title = "Smart Recruitment Matching Platform API",
+            Version = "v1"
+        });
+
+    c.AddSecurityDefinition(
+        "Bearer",
+        new OpenApiSecurityScheme
+        {
+            Description =
+                "JWT Authorization header using the Bearer scheme. " +
+                "Example: \"Authorization: Bearer {token}\"",
+
+            Name = "Authorization",
+            In = ParameterLocation.Header,
+            Type = SecuritySchemeType.ApiKey,
+            Scheme = "Bearer"
+        });
+
+    c.AddSecurityRequirement(
+        new OpenApiSecurityRequirement
+        {
+            {
+                new OpenApiSecurityScheme
+                {
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer"
+                    }
+                },
+                Array.Empty<string>()
+            }
+        });
+});
 
 
 // ======================================
@@ -177,7 +251,7 @@ builder.Services.AddScoped<
 
 
 // ======================================
-// Job Seeker Repositories
+// Job Seeker Repositories & Services
 // ======================================
 builder.Services.AddScoped<
     IJobSeekerRepository,
@@ -191,10 +265,6 @@ builder.Services.AddScoped<
     ICVRepository,
     CVRepository>();
 
-
-// ======================================
-// Job Seeker Services
-// ======================================
 builder.Services.AddScoped<
     IJobSeekerProfileService,
     JobSeekerProfileService>();
@@ -205,46 +275,97 @@ builder.Services.AddScoped<
 
 
 // ======================================
-// AutoMapper
+// Job Seeker Experience
+// ======================================
+builder.Services.AddScoped<
+    IExperienceRepository,
+    ExperienceRepository>();
+
+builder.Services.AddScoped<
+    IExperienceService,
+    ExperienceService>();
+
+
+// ======================================
+// Job Seeker Education
+// ======================================
+builder.Services.AddScoped<
+    IEducationRepository,
+    EducationRepository>();
+
+builder.Services.AddScoped<
+    IEducationService,
+    EducationService>();
+
+
+// ======================================
+// Skills
+// ======================================
+builder.Services.AddScoped<
+    ISkillRepository,
+    SkillRepository>();
+
+builder.Services.AddScoped<
+    ISkillService,
+    SkillService>();
+
+builder.Services.AddScoped<
+    IJobSeekerSkillRepository,
+    JobSeekerSkillRepository>();
+
+builder.Services.AddScoped<
+    IJobSeekerSkillService,
+    JobSeekerSkillService>();
+
+
+// ======================================
+// Employer & Vacancy Repositories & Services
+// ======================================
+builder.Services.AddScoped<
+    IEmployerRepository,
+    EmployerRepository>();
+
+builder.Services.AddScoped<
+    IVacancyRepository,
+    VacancyRepository>();
+
+builder.Services.AddScoped<
+    IVacancyService,
+    VacancyService>();
+
+
+// ======================================
+// Application Repositories & Services
+// ======================================
+builder.Services.AddScoped<
+    IApplicationRepository,
+    ApplicationRepository>();
+
+builder.Services.AddScoped<
+    IApplicationService,
+    ApplicationService>();
+
+
+// ======================================
+// Contact Request Repositories & Services
+// ======================================
+builder.Services.AddScoped<
+    IContactRequestRepository,
+    ContactRequestRepository>();
+
+builder.Services.AddScoped<
+    IContactRequestService,
+    ContactRequestService>();
+
+
+// ======================================
+// AutoMapper & FluentValidation
 // ======================================
 builder.Services.AddAutoMapper(
     typeof(JobSeekerMappingProfile).Assembly);
 
-
-// ======================================
-// FluentValidation
-// ======================================
 builder.Services.AddValidatorsFromAssemblyContaining<
     CreateJobSeekerProfileValidator>();
-
-
-
-// ======================================
-// Job Seeker Repositories
-// ======================================
-builder.Services.AddScoped<
-    IJobSeekerRepository,
-    JobSeekerRepository>();
-
-builder.Services.AddScoped<
-    IJobSeekerProfileRepository,
-    JobSeekerProfileRepository>();
-
-builder.Services.AddScoped<
-    ICVRepository,
-    CVRepository>();
-
-
-// ======================================
-// Job Seeker Services
-// ======================================
-builder.Services.AddScoped<
-    IJobSeekerProfileService,
-    JobSeekerProfileService>();
-
-builder.Services.AddScoped<
-    ICVService,
-    CVService>();
 
 
 // ======================================

@@ -1,18 +1,24 @@
-﻿namespace SmartRecruitmentMatchingPlatform.API.Interfaces.Services.Applications
+using SmartRecruitmentMatchingPlatform.API.Models.Entities;
+
+namespace SmartRecruitmentMatchingPlatform.API.Interfaces.Services.Applications
 {
     public interface IApplicationService
     {
-        // Get applications received for a vacancy
-        Task<object> GetApplicationsByVacancyAsync(
+        Task<(bool Success, string Message, Application? Application)> ApplyAsync(
+            int jobSeekerId,
+            int vacancyId);
+
+        Task<IEnumerable<Application>> GetApplicationsByVacancyAsync(
             int vacancyId,
             int employerId);
 
-        // Get a specific application
-        Task<object?> GetApplicationByIdAsync(
+        Task<IEnumerable<Application>> GetJobSeekerApplicationsAsync(
+            int jobSeekerId);
+
+        Task<Application?> GetApplicationByIdAsync(
             int applicationId,
             int employerId);
 
-        // Update application status
         Task<bool> UpdateApplicationStatusAsync(
             int applicationId,
             string status,

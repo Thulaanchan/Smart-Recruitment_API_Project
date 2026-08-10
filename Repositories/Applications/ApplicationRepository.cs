@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using SmartRecruitmentMatchingPlatform.API.Data.Context;
 using SmartRecruitmentMatchingPlatform.API.Interfaces.Repositories.Applications;
 using SmartRecruitmentMatchingPlatform.API.Models.Entities;
@@ -27,6 +27,20 @@ namespace SmartRecruitmentMatchingPlatform.API.Repositories.Applications
             return await _context.Applications
                 .Where(a => a.VacancyId == vacancyId)
                 .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Application>> GetByJobSeekerIdAsync(
+            int jobSeekerId)
+        {
+            return await _context.Applications
+                .Where(a => a.JobSeekerId == jobSeekerId)
+                .ToListAsync();
+        }
+
+        public async Task<bool> HasAppliedAsync(int jobSeekerId, int vacancyId)
+        {
+            return await _context.Applications
+                .AnyAsync(a => a.JobSeekerId == jobSeekerId && a.VacancyId == vacancyId);
         }
 
         public async Task AddAsync(Application application)

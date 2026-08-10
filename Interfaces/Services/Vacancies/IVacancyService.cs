@@ -1,37 +1,34 @@
-﻿namespace SmartRecruitmentMatchingPlatform.API.Interfaces.Services.Vacancies
+using SmartRecruitmentMatchingPlatform.API.Models.DTOs.Vacancies;
+
+namespace SmartRecruitmentMatchingPlatform.API.Interfaces.Services.Vacancies
 {
     public interface IVacancyService
     {
-        // Create a new vacancy for an employer
-        Task<bool> CreateVacancyAsync(
+        Task<EmployerVacancyDto?> CreateVacancyAsync(
             int employerId,
-            object createData);
+            CreateVacancyDto dto);
 
-        // Get a vacancy by Id
-        Task<object?> GetVacancyByIdAsync(
+        Task<EmployerVacancyDto?> GetVacancyByIdAsync(
             int vacancyId);
 
-        // Get all vacancies created by an employer
-        Task<object> GetEmployerVacanciesAsync(
+        Task<IEnumerable<EmployerVacancyDto>> GetEmployerVacanciesAsync(
             int employerId);
 
-        // Update an existing vacancy
+        Task<IEnumerable<EmployerVacancyDto>> GetAllVacanciesAsync();
+
         Task<bool> UpdateVacancyAsync(
             int vacancyId,
             int employerId,
-            object updateData);
+            UpdateVacancyDto dto);
 
-        // Close a vacancy
         Task<bool> CloseVacancyAsync(
             int vacancyId,
             int employerId);
 
-        // Reopen a closed vacancy
         Task<bool> ReopenVacancyAsync(
             int vacancyId,
             int employerId);
 
-        // Check whether vacancy exists
         Task<bool> ExistsAsync(
             int vacancyId);
     }

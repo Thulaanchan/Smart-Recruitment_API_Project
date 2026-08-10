@@ -1,6 +1,6 @@
-﻿using SmartRecruitmentMatchingPlatform.API.Models.Entities.Employers;
-using SmartRecruitmentMatchingPlatform.API.Models.Entities.JobSeekers;
+using SmartRecruitmentMatchingPlatform.API.Models.Entities.Employers;
 using SmartRecruitmentMatchingPlatform.API.Models.Enums.ContactRequests;
+using JobSeekerEntity = SmartRecruitmentMatchingPlatform.API.Models.Entities.JobSeekers.JobSeeker;
 
 namespace SmartRecruitmentMatchingPlatform.API.Models.Entities.ContactRequests
 {
@@ -30,7 +30,7 @@ namespace SmartRecruitmentMatchingPlatform.API.Models.Entities.ContactRequests
         // Navigation properties
         public Employer? Employer { get; set; }
 
-        public JobSeeker? JobSeeker { get; set; }
+        public JobSeekerEntity? JobSeeker { get; set; }
 
         public Vacancy? Vacancy { get; set; }
     }

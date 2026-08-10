@@ -1,4 +1,4 @@
-﻿using SmartRecruitmentMatchingPlatform.API.Interfaces.Repositories.Matching;
+using SmartRecruitmentMatchingPlatform.API.Interfaces.Repositories.Matching;
 using SmartRecruitmentMatchingPlatform.API.Interfaces.Services.Matching;
 using SmartRecruitmentMatchingPlatform.API.Matching.Engine;
 using SmartRecruitmentMatchingPlatform.API.Matching.Ranking;
@@ -70,7 +70,7 @@ namespace SmartRecruitmentMatchingPlatform.API.Services.Matching
                 candidates.Add(new RankedCandidateDto
                 {
                     JobSeekerId = input.JobSeekerId,
-                    CandidateName = $"Candidate {input.JobSeekerId}",
+                    CandidateName = string.IsNullOrWhiteSpace(input.JobSeekerName) ? $"Candidate {input.JobSeekerId}" : input.JobSeekerName,
                     MatchScore = result.MatchScore.OverallScore
                 });
             }

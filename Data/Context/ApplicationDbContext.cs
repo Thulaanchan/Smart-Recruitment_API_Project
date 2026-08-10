@@ -18,9 +18,11 @@ using SmartRecruitmentMatchingPlatform.API.Models.Entities.Employers;
 using SmartRecruitmentMatchingPlatform.API.Models.Entities;
 
 // ======================================
-// Notifications
+// Notifications & Contact Requests & Skills
 // ======================================
 using SmartRecruitmentMatchingPlatform.API.Models.Entities.Notifications;
+using SmartRecruitmentMatchingPlatform.API.Models.Entities.ContactRequests;
+using SmartRecruitmentMatchingPlatform.API.Models.Entities.Skills;
 
 // ======================================
 // Job Seeker aliases
@@ -103,13 +105,16 @@ namespace SmartRecruitmentMatchingPlatform.API.Data.Context
 
 
         // ======================================
-        // Vacancy Module
+        // Vacancy & Skills Module
         // ======================================
 
         public DbSet<Vacancy> Vacancies { get; set; }
             = null!;
 
         public DbSet<VacancySkill> VacancySkills { get; set; }
+            = null!;
+
+        public DbSet<Skill> Skills { get; set; }
             = null!;
 
 
@@ -126,6 +131,14 @@ namespace SmartRecruitmentMatchingPlatform.API.Data.Context
         // ======================================
 
         public DbSet<Notification> Notifications { get; set; }
+            = null!;
+
+
+        // ======================================
+        // Contact Request Module
+        // ======================================
+
+        public DbSet<ContactRequest> ContactRequests { get; set; }
             = null!;
 
 
@@ -176,6 +189,27 @@ namespace SmartRecruitmentMatchingPlatform.API.Data.Context
 
 
             // ======================================
+            // Application Configuration
+            // ======================================
+
+            modelBuilder.Entity<Application>()
+                .HasIndex(a => new { a.JobSeekerId, a.VacancyId })
+                .IsUnique();
+
+            modelBuilder.Entity<Application>()
+                .HasOne<JobSeekerEntity>()
+                .WithMany()
+                .HasForeignKey(a => a.JobSeekerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Application>()
+                .HasOne<Vacancy>()
+                .WithMany()
+                .HasForeignKey(a => a.VacancyId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+
+            // ======================================
             // Notification Configuration
             // ======================================
 
@@ -200,6 +234,31 @@ namespace SmartRecruitmentMatchingPlatform.API.Data.Context
 
             modelBuilder.Entity<Notification>()
                 .HasIndex(n => n.UserId);
+
+
+            // ======================================
+            // Contact Request Configuration
+            // ======================================
+
+            modelBuilder.Entity<ContactRequest>(builder =>
+            {
+                builder.HasKey(c => c.ContactRequestId);
+
+                builder.HasOne(c => c.Employer)
+                    .WithMany()
+                    .HasForeignKey(c => c.EmployerId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                builder.HasOne(c => c.JobSeeker)
+                    .WithMany()
+                    .HasForeignKey(c => c.JobSeekerId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                builder.HasOne(c => c.Vacancy)
+                    .WithMany()
+                    .HasForeignKey(c => c.VacancyId)
+                    .OnDelete(DeleteBehavior.SetNull);
+            });
 
 
             // ======================================

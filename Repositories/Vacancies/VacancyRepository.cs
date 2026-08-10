@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using SmartRecruitmentMatchingPlatform.API.Data.Context;
 using SmartRecruitmentMatchingPlatform.API.Interfaces.Repositories.Vacancies;
 using SmartRecruitmentMatchingPlatform.API.Models.Entities;
@@ -17,14 +17,18 @@ namespace SmartRecruitmentMatchingPlatform.API.Repositories.Vacancies
         public async Task<Vacancy?> GetByIdAsync(int vacancyId)
         {
             return await _context
-                .Set<Vacancy>()
+                .Vacancies
+                .Include(v => v.VacancySkills)
+                    .ThenInclude(vs => vs.Skill)
                 .FirstOrDefaultAsync(v => v.VacancyId == vacancyId);
         }
 
         public async Task<IEnumerable<Vacancy>> GetAllAsync()
         {
             return await _context
-                .Set<Vacancy>()
+                .Vacancies
+                .Include(v => v.VacancySkills)
+                    .ThenInclude(vs => vs.Skill)
                 .AsNoTracking()
                 .ToListAsync();
         }
@@ -33,7 +37,9 @@ namespace SmartRecruitmentMatchingPlatform.API.Repositories.Vacancies
             int employerId)
         {
             return await _context
-                .Set<Vacancy>()
+                .Vacancies
+                .Include(v => v.VacancySkills)
+                    .ThenInclude(vs => vs.Skill)
                 .AsNoTracking()
                 .Where(v => v.EmployerId == employerId)
                 .ToListAsync();
