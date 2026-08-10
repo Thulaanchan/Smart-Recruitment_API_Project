@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -6,16 +6,253 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <!-- ====================================== -->
+  <!-- NuGet Packages -->
+  <!-- ====================================== -->
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.0">
+
+    <!-- Job Seeker -->
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection"
+                      Version="8.1.1" />
+
+    <PackageReference Include="FluentValidation"
+                      Version="12.1.1" />
+
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions"
+                      Version="12.1.1" />
+
+    <PackageReference Include="Mediarq"
+                      Version="1.5.1" />
+
+    <!-- Authentication -->
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer"
+                      Version="8.0.29" />
+
+    <!-- Entity Framework Core -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design"
+                      Version="8.0.29">
       <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <IncludeAssets>
+        runtime; build; native; contentfiles; analyzers; buildtransitive
+      </IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer"
+                      Version="8.0.29" />
+
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools"
+                      Version="8.0.29">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>
+        runtime; build; native; contentfiles; analyzers; buildtransitive
+      </IncludeAssets>
+    </PackageReference>
+
+    <!-- Swagger -->
+    <PackageReference Include="Swashbuckle.AspNetCore"
+                      Version="6.6.2" />
+
   </ItemGroup>
-	<ItemGroup>
-		<Compile Remove="SmartRecruitmentMatchingPlatform.Tests\**\*.cs" />
-	</ItemGroup>
+
+
+  <!-- ====================================== -->
+  <!-- Exclude nested test source files -->
+  <!-- ====================================== -->
+  <ItemGroup>
+    <Compile Remove="SmartRecruitmentMatchingPlatform.Tests\**\*.cs" />
+  </ItemGroup>
+
+
+  <!-- ====================================== -->
+  <!-- Project Folder Structure -->
+  <!-- ====================================== -->
+  <ItemGroup>
+
+    <!-- Configurations -->
+    <Folder Include="Configurations\EntityConfigurations\" />
+    <Folder Include="Configurations\JWT\" />
+    <Folder Include="Configurations\Swagger\" />
+
+    <!-- Constants -->
+    <Folder Include="Constants\Authentication\" />
+    <Folder Include="Constants\Common\" />
+    <Folder Include="Constants\Matching\" />
+    <Folder Include="Constants\Roles\" />
+
+    <!-- Controllers -->
+    <Folder Include="Controllers\Admin\" />
+    <Folder Include="Controllers\Applications\" />
+    <Folder Include="Controllers\Auth\" />
+    <Folder Include="Controllers\Companies\" />
+    <Folder Include="Controllers\ContactRequests\" />
+    <Folder Include="Controllers\Employers\" />
+    <Folder Include="Controllers\JobSeekers\" />
+    <Folder Include="Controllers\Matching\" />
+    <Folder Include="Controllers\Notifications\" />
+    <Folder Include="Controllers\Users\" />
+    <Folder Include="Controllers\Vacancies\" />
+
+    <!-- Data -->
+    <Folder Include="Data\Context\" />
+    <Folder Include="Data\Migrations\" />
+    <Folder Include="Data\Seed\" />
+
+    <!-- Extensions -->
+    <Folder Include="Extensions\Application\" />
+    <Folder Include="Extensions\Services\" />
+
+    <!-- Helpers -->
+    <Folder Include="Helpers\Authentication\" />
+    <Folder Include="Helpers\Common\" />
+    <Folder Include="Helpers\Files\" />
+    <Folder Include="Helpers\Matching\" />
+
+    <!-- Repository Interfaces -->
+    <Folder Include="Interfaces\Repositories\Applications\" />
+    <Folder Include="Interfaces\Repositories\Companies\" />
+    <Folder Include="Interfaces\Repositories\ContactRequests\" />
+    <Folder Include="Interfaces\Repositories\Employers\" />
+    <Folder Include="Interfaces\Repositories\JobSeekers\" />
+    <Folder Include="Interfaces\Repositories\Matching\" />
+    <Folder Include="Interfaces\Repositories\Notifications\" />
+    <Folder Include="Interfaces\Repositories\Skills\" />
+    <Folder Include="Interfaces\Repositories\Users\" />
+    <Folder Include="Interfaces\Repositories\Vacancies\" />
+
+    <!-- Other Interfaces -->
+    <Folder Include="Interfaces\Security\" />
+    <Folder Include="Interfaces\Storage\" />
+
+    <!-- Service Interfaces -->
+    <Folder Include="Interfaces\Services\Admin\" />
+    <Folder Include="Interfaces\Services\Applications\" />
+    <Folder Include="Interfaces\Services\Auth\" />
+    <Folder Include="Interfaces\Services\Companies\" />
+    <Folder Include="Interfaces\Services\ContactRequests\" />
+    <Folder Include="Interfaces\Services\Employers\" />
+    <Folder Include="Interfaces\Services\JobSeekers\" />
+    <Folder Include="Interfaces\Services\Matching\" />
+    <Folder Include="Interfaces\Services\Notifications\" />
+    <Folder Include="Interfaces\Services\Users\" />
+    <Folder Include="Interfaces\Services\Vacancies\" />
+
+    <!-- Mappings -->
+    <Folder Include="Mappings\Applications\" />
+    <Folder Include="Mappings\Auth\" />
+    <Folder Include="Mappings\Companies\" />
+    <Folder Include="Mappings\Employers\" />
+    <Folder Include="Mappings\JobSeekers\" />
+    <Folder Include="Mappings\Matching\" />
+    <Folder Include="Mappings\Users\" />
+    <Folder Include="Mappings\Vacancies\" />
+
+    <!-- Matching Engine -->
+    <Folder Include="Matching\Engine\" />
+    <Folder Include="Matching\Filtering\" />
+    <Folder Include="Matching\Ranking\" />
+    <Folder Include="Matching\Scoring\" />
+    <Folder Include="Matching\SkillGap\" />
+
+    <!-- Middleware -->
+    <Folder Include="Middleware\ExceptionHandling\" />
+    <Folder Include="Middleware\Logging\" />
+
+    <!-- DTOs -->
+    <Folder Include="Models\DTOs\Admin\" />
+    <Folder Include="Models\DTOs\Applications\" />
+    <Folder Include="Models\DTOs\Auth\" />
+    <Folder Include="Models\DTOs\Common\" />
+    <Folder Include="Models\DTOs\Companies\" />
+    <Folder Include="Models\DTOs\ContactRequests\" />
+    <Folder Include="Models\DTOs\Employers\" />
+    <Folder Include="Models\DTOs\JobSeekers\" />
+    <Folder Include="Models\DTOs\Matching\" />
+    <Folder Include="Models\DTOs\Notifications\" />
+    <Folder Include="Models\DTOs\Skills\" />
+    <Folder Include="Models\DTOs\Users\" />
+    <Folder Include="Models\DTOs\Vacancies\" />
+
+    <!-- Entities -->
+    <Folder Include="Models\Entities\Applications\" />
+    <Folder Include="Models\Entities\Companies\" />
+    <Folder Include="Models\Entities\ContactRequests\" />
+    <Folder Include="Models\Entities\Employers\" />
+    <Folder Include="Models\Entities\JobSeekers\" />
+    <Folder Include="Models\Entities\Notifications\" />
+    <Folder Include="Models\Entities\Skills\" />
+    <Folder Include="Models\Entities\Users\" />
+    <Folder Include="Models\Entities\Vacancies\" />
+
+    <!-- Enums -->
+    <Folder Include="Models\Enums\Applications\" />
+    <Folder Include="Models\Enums\Common\" />
+    <Folder Include="Models\Enums\ContactRequests\" />
+    <Folder Include="Models\Enums\Users\" />
+    <Folder Include="Models\Enums\Vacancies\" />
+
+    <!-- Repositories -->
+    <Folder Include="Repositories\Applications\" />
+    <Folder Include="Repositories\Companies\" />
+    <Folder Include="Repositories\ContactRequests\" />
+    <Folder Include="Repositories\Employers\" />
+    <Folder Include="Repositories\JobSeekers\" />
+    <Folder Include="Repositories\Matching\" />
+    <Folder Include="Repositories\Notifications\" />
+    <Folder Include="Repositories\Skills\" />
+    <Folder Include="Repositories\Users\" />
+    <Folder Include="Repositories\Vacancies\" />
+
+    <!-- Services -->
+    <Folder Include="Services\Admin\" />
+    <Folder Include="Services\Applications\" />
+    <Folder Include="Services\Auth\" />
+    <Folder Include="Services\Companies\" />
+    <Folder Include="Services\ContactRequests\" />
+    <Folder Include="Services\Employers\" />
+    <Folder Include="Services\JobSeekers\" />
+    <Folder Include="Services\Matching\" />
+    <Folder Include="Services\Notifications\" />
+    <Folder Include="Services\Storage\" />
+    <Folder Include="Services\Users\" />
+    <Folder Include="Services\Vacancies\" />
+
+    <!-- Storage -->
+    <Folder Include="Storage\CompanyLogos\" />
+    <Folder Include="Storage\CVs\" />
+    <Folder Include="Storage\ProfileImages\" />
+
+    <!-- Validators -->
+    <Folder Include="Validators\Applications\" />
+    <Folder Include="Validators\Auth\" />
+    <Folder Include="Validators\Common\" />
+    <Folder Include="Validators\Employers\" />
+    <Folder Include="Validators\JobSeekers\" />
+    <Folder Include="Validators\Users\" />
+    <Folder Include="Validators\Vacancies\" />
+
+    <!-- Frontend Assets -->
+    <Folder Include="wwwroot\assets\icons\" />
+    <Folder Include="wwwroot\assets\images\" />
+    <Folder Include="wwwroot\assets\logos\" />
+
+    <!-- Frontend CSS -->
+    <Folder Include="wwwroot\css\admin\" />
+    <Folder Include="wwwroot\css\auth\" />
+    <Folder Include="wwwroot\css\common\" />
+    <Folder Include="wwwroot\css\employer\" />
+    <Folder Include="wwwroot\css\jobseeker\" />
+    <Folder Include="wwwroot\css\matching\" />
+
+    <!-- Frontend JavaScript -->
+    <Folder Include="wwwroot\js\admin\" />
+    <Folder Include="wwwroot\js\api\" />
+    <Folder Include="wwwroot\js\auth\" />
+    <Folder Include="wwwroot\js\common\" />
+    <Folder Include="wwwroot\js\employer\" />
+    <Folder Include="wwwroot\js\jobseeker\" />
+    <Folder Include="wwwroot\js\matching\" />
+    <Folder Include="wwwroot\js\notifications\" />
+
+  </ItemGroup>
 
 </Project>
