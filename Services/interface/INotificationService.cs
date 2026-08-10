@@ -14,5 +14,7 @@ namespace SmartRecruitmentMatchingPlatform.API.Services.Interfaces
             string message);
 
         Task<bool> MarkAsReadAsync(int id);
+
+        Task<int> GetUnreadCountAsync(int userId);
     }
 }

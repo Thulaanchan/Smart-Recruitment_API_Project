@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using SmartRecruitmentMatchingPlatform.API.Models.DTOs.Notifications;
 using SmartRecruitmentMatchingPlatform.API.Services.Interfaces;
 
 namespace SmartRecruitmentMatchingPlatform.API.Controllers.Notifications
@@ -15,6 +16,7 @@ namespace SmartRecruitmentMatchingPlatform.API.Controllers.Notifications
             _notificationService = notificationService;
         }
 
+        // Get all notifications for a user
         [HttpGet("user/{userId}")]
         public async Task<IActionResult> GetUserNotifications(int userId)
         {
@@ -24,6 +26,7 @@ namespace SmartRecruitmentMatchingPlatform.API.Controllers.Notifications
             return Ok(notifications);
         }
 
+        // Get notification by ID
         [HttpGet("{id}")]
         public async Task<IActionResult> GetNotificationById(int id)
         {
@@ -36,6 +39,24 @@ namespace SmartRecruitmentMatchingPlatform.API.Controllers.Notifications
             return Ok(notification);
         }
 
+        // Create a new notification
+        [HttpPost]
+        public async Task<IActionResult> CreateNotification(
+            [FromBody] CreateNotificationDto dto)
+        {
+            await _notificationService.CreateNotificationAsync(
+                dto.UserId,
+                dto.Title,
+                dto.Message
+            );
+
+            return Ok(new
+            {
+                message = "Notification created successfully."
+            });
+        }
+
+        // Mark notification as read
         [HttpPut("{id}/read")]
         public async Task<IActionResult> MarkAsRead(int id)
         {
@@ -50,20 +71,19 @@ namespace SmartRecruitmentMatchingPlatform.API.Controllers.Notifications
                 message = "Notification marked as read."
             });
         }
-        [HttpPost("test")]
-        public async Task<IActionResult> CreateTestNotification()
+
+        // Get unread notification count
+        [HttpGet("user/{userId}/unread-count")]
+        public async Task<IActionResult> GetUnreadCount(int userId)
         {
-            await _notificationService.CreateNotificationAsync(
-                1,
-                "Application Status Updated",
-                "Your application has been shortlisted."
-            );
+            var count =
+                await _notificationService.GetUnreadCountAsync(userId);
 
             return Ok(new
             {
-                message = "Test notification created successfully."
+                userId = userId,
+                unreadCount = count
             });
         }
     }
-
 }

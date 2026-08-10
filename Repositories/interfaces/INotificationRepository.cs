@@ -13,5 +13,7 @@ namespace SmartRecruitmentMatchingPlatform.API.Repositories.Interfaces
         Task UpdateAsync(Notification notification);
 
         Task SaveChangesAsync();
+
+        Task<int> GetUnreadCountAsync(int userId);
     }
 }

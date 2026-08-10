@@ -43,5 +43,11 @@ namespace SmartRecruitmentMatchingPlatform.API.Repositories.Implementations
         {
             await _context.SaveChangesAsync();
         }
+
+        public async Task<int> GetUnreadCountAsync(int userId)
+        {
+            return await _context.Notifications
+                .CountAsync(n => n.UserId == userId && !n.IsRead);
+        }
     }
 }
