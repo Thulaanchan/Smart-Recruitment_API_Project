@@ -12,36 +12,28 @@
   <ItemGroup>
 
     <!-- Job Seeker -->
-    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection"
-                      Version="8.1.1" />
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
 
-    <PackageReference Include="FluentValidation"
-                      Version="12.1.1" />
+    <PackageReference Include="FluentValidation" Version="12.1.1" />
 
-    <PackageReference Include="FluentValidation.DependencyInjectionExtensions"
-                      Version="12.1.1" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
 
-    <PackageReference Include="Mediarq"
-                      Version="1.5.1" />
+    <PackageReference Include="Mediarq" Version="1.5.1" />
 
     <!-- Authentication -->
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer"
-                      Version="8.0.29" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.29" />
 
     <!-- Entity Framework Core -->
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design"
-                      Version="8.0.29">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.29">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>
         runtime; build; native; contentfiles; analyzers; buildtransitive
       </IncludeAssets>
     </PackageReference>
 
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer"
-                      Version="8.0.29" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.29" />
 
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools"
-                      Version="8.0.29">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.29">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>
         runtime; build; native; contentfiles; analyzers; buildtransitive
@@ -49,8 +41,7 @@
     </PackageReference>
 
     <!-- Swagger -->
-    <PackageReference Include="Swashbuckle.AspNetCore"
-                      Version="6.6.2" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
 
   </ItemGroup>
 
@@ -175,7 +166,6 @@
     <!-- Entities -->
     <Folder Include="Models\Entities\Applications\" />
     <Folder Include="Models\Entities\Companies\" />
-    <Folder Include="Models\Entities\ContactRequests\" />
     <Folder Include="Models\Entities\Employers\" />
     <Folder Include="Models\Entities\JobSeekers\" />
     <Folder Include="Models\Entities\Notifications\" />
@@ -186,7 +176,6 @@
     <!-- Enums -->
     <Folder Include="Models\Enums\Applications\" />
     <Folder Include="Models\Enums\Common\" />
-    <Folder Include="Models\Enums\ContactRequests\" />
     <Folder Include="Models\Enums\Users\" />
     <Folder Include="Models\Enums\Vacancies\" />
 
