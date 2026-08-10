@@ -4,12 +4,14 @@ using SmartRecruitmentMatchingPlatform.API.Interfaces.Services.Matching;
 
 namespace SmartRecruitmentMatchingPlatform.API.Controllers.Matching
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     [Authorize]
     public class MatchingController : ControllerBase
     {
-        public MatchingController()
+        private readonly IMatchingService _matchingService;
+
+        public MatchingController(IMatchingService matchingService)
         {
             _matchingService = matchingService;
         }
@@ -24,9 +26,39 @@ namespace SmartRecruitmentMatchingPlatform.API.Controllers.Matching
             });
         }
 
-        // GET: api/matching/vacancy/5
-        [HttpGet("vacancy/{vacancyId:int}")]
-        public IActionResult GetMatchesByVacancy(int vacancyId)
+        // GET: api/matching/jobseeker/1/vacancy/5
+        [HttpGet("jobseeker/{jobSeekerId:int}/vacancy/{vacancyId:int}")]
+        public async Task<IActionResult> GetMatch(
+            int jobSeekerId,
+            int vacancyId)
+        {
+            if (jobSeekerId <= 0 || vacancyId <= 0)
+            {
+                return BadRequest(new
+                {
+                    message = "Invalid job seeker ID or vacancy ID."
+                });
+            }
+
+            var result = await _matchingService.GetMatchAsync(
+                jobSeekerId,
+                vacancyId);
+
+            if (result == null)
+            {
+                return NotFound(new
+                {
+                    message = "Job seeker or vacancy could not be found."
+                });
+            }
+
+            return Ok(result);
+        }
+
+        // GET: api/matching/vacancy/5/ranked-candidates
+        [HttpGet("vacancy/{vacancyId:int}/ranked-candidates")]
+        public async Task<IActionResult> GetRankedCandidates(
+            int vacancyId)
         {
             if (vacancyId <= 0)
             {
@@ -36,11 +68,10 @@ namespace SmartRecruitmentMatchingPlatform.API.Controllers.Matching
                 });
             }
 
-            return Ok(new
-            {
-                vacancyId,
-                message = "Candidate matching endpoint is working."
-            });
+            var candidates =
+                await _matchingService.GetRankedCandidatesAsync(vacancyId);
+
+            return Ok(candidates);
         }
     }
 }

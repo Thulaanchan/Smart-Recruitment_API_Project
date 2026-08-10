@@ -1,11 +1,16 @@
 using FluentValidation;
+
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 
 using SmartRecruitmentMatchingPlatform.API.Data.Context;
 
+// ======================================
+// Authentication
+// ======================================
 using SmartRecruitmentMatchingPlatform.Configurations;
 using SmartRecruitmentMatchingPlatform.Interfaces.Repositories.Users;
 using SmartRecruitmentMatchingPlatform.Interfaces.Services;
@@ -17,6 +22,17 @@ using SmartRecruitmentMatchingPlatform.Services.Auth;
 using SmartRecruitmentMatchingPlatform.Services.Users;
 using SmartRecruitmentMatchingPlatform.Validators.Auth;
 
+// ======================================
+// Job Seeker
+// ======================================
+using SmartRecruitmentMatchingPlatform.API.Interfaces.Repositories.JobSeekers;
+using SmartRecruitmentMatchingPlatform.API.Interfaces.Services.JobSeekers;
+using SmartRecruitmentMatchingPlatform.API.Repositories.JobSeekers;
+using SmartRecruitmentMatchingPlatform.API.Services.JobSeekers;
+
+// ======================================
+// Matching
+// ======================================
 using SmartRecruitmentMatchingPlatform.API.Interfaces.Repositories.Matching;
 using SmartRecruitmentMatchingPlatform.API.Interfaces.Services.Matching;
 using SmartRecruitmentMatchingPlatform.API.Matching.Engine;
@@ -29,17 +45,61 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
 // ======================================
 // Controllers
 // ======================================
 builder.Services.AddControllers();
 
+
 // ======================================
-// Database - TEMPORARY
-// Real SQL Server options will be added
-// after the shared database is finalized.
+// Swagger + JWT Authorization
 // ======================================
-builder.Services.AddDbContext<ApplicationDbContext>();
+builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition(
+        "Bearer",
+        new OpenApiSecurityScheme
+        {
+            Name = "Authorization",
+            Type = SecuritySchemeType.Http,
+            Scheme = "bearer",
+            BearerFormat = "JWT",
+            In = ParameterLocation.Header,
+            Description =
+                "Enter your JWT access token."
+        });
+
+    options.AddSecurityRequirement(
+        new OpenApiSecurityRequirement
+        {
+            {
+                new OpenApiSecurityScheme
+                {
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer"
+                    }
+                },
+                Array.Empty<string>()
+            }
+        });
+});
+
+
+// ======================================
+// Database
+// ======================================
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+{
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString(
+            "DefaultConnection"));
+});
+
 
 // ======================================
 // JWT Settings
@@ -59,6 +119,7 @@ if (string.IsNullOrWhiteSpace(jwtSettings.Key))
     throw new InvalidOperationException(
         "JWT Key is missing.");
 }
+
 
 // ======================================
 // JWT Authentication
@@ -94,10 +155,12 @@ builder.Services
             };
     });
 
+
 // ======================================
 // Authorization
 // ======================================
 builder.Services.AddAuthorization();
+
 
 // ======================================
 // Authentication Repositories
@@ -109,6 +172,7 @@ builder.Services.AddScoped<
 builder.Services.AddScoped<
     IRefreshTokenRepository,
     RefreshTokenRepository>();
+
 
 // ======================================
 // Authentication Services
@@ -125,14 +189,17 @@ builder.Services.AddScoped<
     IUserService,
     UserService>();
 
+
 // ======================================
 // Password Hashing
 // ======================================
-// Keep the exact PasswordHasher registration
-// used by the Authentication branch here.
+builder.Services.AddScoped<
+    IPasswordHasher<User>,
+    PasswordHasher<User>>();
+
 
 // ======================================
-// FluentValidation
+// Authentication Validators
 // ======================================
 builder.Services.AddScoped<
     IValidator<RegisterRequestDto>,
@@ -143,8 +210,37 @@ builder.Services.AddScoped<
     LoginValidator>();
 
 builder.Services.AddScoped<
-    IValidator<ChangePasswordRequestDto>,
+    IValidator<ChangePasswordDto>,
     ChangePasswordValidator>();
+
+
+// ======================================
+// Job Seeker Repositories
+// ======================================
+builder.Services.AddScoped<
+    IJobSeekerRepository,
+    JobSeekerRepository>();
+
+builder.Services.AddScoped<
+    IJobSeekerProfileRepository,
+    JobSeekerProfileRepository>();
+
+builder.Services.AddScoped<
+    ICVRepository,
+    CVRepository>();
+
+
+// ======================================
+// Job Seeker Services
+// ======================================
+builder.Services.AddScoped<
+    IJobSeekerProfileService,
+    JobSeekerProfileService>();
+
+builder.Services.AddScoped<
+    ICVService,
+    CVService>();
+
 
 // ======================================
 // Matching Module
@@ -161,13 +257,12 @@ builder.Services.AddScoped<MatchingEngine>();
 builder.Services.AddScoped<CandidateRanker>();
 builder.Services.AddScoped<JobFilter>();
 
-// ======================================
-// Swagger
-// ======================================
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
+// ======================================
+// Build Application
+// ======================================
 var app = builder.Build();
+
 
 // ======================================
 // HTTP Request Pipeline
@@ -181,7 +276,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 // IMPORTANT:
-// Authentication must come before Authorization.
+// Authentication before Authorization
 app.UseAuthentication();
 app.UseAuthorization();
 
