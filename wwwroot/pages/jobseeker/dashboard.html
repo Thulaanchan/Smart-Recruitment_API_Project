@@ -1,10 +1,402 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Recruitment Matching Platform</title>
+    <title>Job Seeker Portal - Smart Recruitment Platform</title>
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
+    <div id="navbar-container"></div>
+
+    <main class="container">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
+            <div>
+                <h2>Job Seeker Workspace</h2>
+                <p style="color:var(--text-muted);">Manage your profile, CV, and track matching job vacancies</p>
+            </div>
+            <div id="jobseeker-info" class="badge badge-primary" style="font-size:0.9rem; padding:0.5rem 1rem;">
+                Loading Profile...
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('jobs')">🔍 Explore Vacancies</button>
+            <button class="tab-btn" onclick="switchTab('applications')">📋 My Applications</button>
+            <button class="tab-btn" onclick="switchTab('profile')">👤 My Profile & CV</button>
+            <button class="tab-btn" onclick="switchTab('notifications')">🔔 Notifications</button>
+        </div>
+
+        <!-- TAB 1: Explore Jobs -->
+        <div id="tab-jobs" class="tab-content">
+            <div class="card" style="margin-bottom:1.5rem; padding:1.25rem;">
+                <div style="display:grid; grid-template-columns: 2fr 1fr 1fr auto; gap:0.75rem; align-items:center;">
+                    <input type="text" id="search-kw" class="form-control" placeholder="Search by title or keywords...">
+                    <input type="text" id="search-loc" class="form-control" placeholder="Location...">
+                    <input type="text" id="search-skills" class="form-control" placeholder="Skills (e.g. C#, SQL)...">
+                    <button class="btn btn-primary" onclick="searchVacancies()">Search</button>
+                </div>
+            </div>
+
+            <div id="jobs-list" class="grid grid-2">
+                <div class="card" style="grid-column:1/-1; text-align:center; padding:3rem; color:var(--text-muted);">
+                    Loading vacancies...
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: Applications -->
+        <div id="tab-applications" class="tab-content" style="display:none;">
+            <div class="card">
+                <h3>Submitted Applications</h3>
+                <div id="applications-list" style="margin-top:1rem;">
+                    <p style="color:var(--text-muted);">Loading applications...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: Profile & CV -->
+        <div id="tab-profile" class="tab-content" style="display:none;">
+            <div class="grid grid-2">
+                <div class="card">
+                    <h3>Profile Information</h3>
+                    <form id="profile-form" style="margin-top:1rem;">
+                        <div class="form-group">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" id="prof-name" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Phone</label>
+                            <input type="text" id="prof-phone" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Bio / Summary</label>
+                            <textarea id="prof-bio" class="form-control"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Profile</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h3>CV Document</h3>
+                    <div id="cv-section" style="margin-top:1rem;">
+                        <p style="color:var(--text-muted);">Loading CV status...</p>
+                    </div>
+
+                    <form id="cv-upload-form" style="margin-top:1.5rem; border-top:1px solid var(--border-color); padding-top:1.5rem;">
+                        <div class="form-group">
+                            <label class="form-label">Upload New CV (PDF / DOC / DOCX)</label>
+                            <input type="file" id="cv-file" class="form-control" accept=".pdf,.doc,.docx" required>
+                        </div>
+                        <button type="submit" class="btn btn-secondary btn-sm">Upload CV</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: Notifications -->
+        <div id="tab-notifications" class="tab-content" style="display:none;">
+            <div class="card">
+                <h3>Notifications</h3>
+                <div id="notifications-list" style="margin-top:1rem;">
+                    <p style="color:var(--text-muted);">Loading notifications...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal for Match Details -->
+    <div id="match-modal" class="modal-backdrop">
+        <div class="modal">
+            <h3 id="match-modal-title">AI Match Score & Analysis</h3>
+            <div id="match-modal-body" style="margin:1.5rem 0;"></div>
+            <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script>
+        let currentJobSeeker = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            renderNavbar('dashboard');
+            if (!Auth.isAuthenticated() || !Auth.hasRole('JobSeeker')) {
+                Auth.logout();
+                return;
+            }
+            await initJobSeeker();
+        });
+
+        async function initJobSeeker() {
+            try {
+                currentJobSeeker = await apiRequest('/jobseekers/profile/me');
+                document.getElementById('jobseeker-info').textContent = `ID: ${currentJobSeeker.id} | ${currentJobSeeker.fullName || 'JobSeeker'}`;
+                populateProfileForm();
+            } catch (err) {
+                console.warn('No existing jobseeker profile record:', err);
+                document.getElementById('jobseeker-info').textContent = 'Profile Setup Needed';
+            }
+            loadVacanciesList();
+            loadCV();
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+            
+            event.target.classList.add('active');
+            document.getElementById(`tab-${tabName}`).style.display = 'block';
+
+            if (tabName === 'jobs') loadVacanciesList();
+            if (tabName === 'applications') loadMyApplications();
+            if (tabName === 'notifications') loadNotifications();
+        }
+
+        async function loadVacanciesList() {
+            const list = document.getElementById('jobs-list');
+            try {
+                const vacancies = await apiRequest('/vacancy');
+                renderVacancies(vacancies);
+            } catch (err) {
+                list.innerHTML = `<p style="color:var(--danger)">Error: ${err.message}</p>`;
+            }
+        }
+
+        async function searchVacancies() {
+            const kw = document.getElementById('search-kw').value;
+            const loc = document.getElementById('search-loc').value;
+            const sk = document.getElementById('search-skills').value;
+            
+            try {
+                const params = new URLSearchParams();
+                if (kw) params.append('keyword', kw);
+                if (loc) params.append('location', loc);
+                if (sk) params.append('skills', sk);
+
+                const vacancies = await apiRequest(`/vacancy/search?${params.toString()}`);
+                renderVacancies(vacancies);
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        }
+
+        function renderVacancies(vacancies) {
+            const list = document.getElementById('jobs-list');
+            if (!vacancies || vacancies.length === 0) {
+                list.innerHTML = `<p style="grid-column:1/-1; text-align:center; color:var(--text-muted); padding:2rem;">No vacancies found.</p>`;
+                return;
+            }
+
+            list.innerHTML = vacancies.map(v => `
+                <div class="card" style="display:flex; flex-direction:column; justify-content:space-between;">
+                    <div>
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.5rem;">
+                            <h4>${v.title}</h4>
+                            <span class="badge badge-primary">${v.vacancyType || 'Full-time'}</span>
+                        </div>
+                        <p style="font-size:0.85rem; color:var(--primary); font-weight:600;">🏢 ${v.companyName || 'Company'}</p>
+                        <p style="font-size:0.85rem; color:var(--text-dim); margin-bottom:0.75rem;">📍 ${v.location || 'Location unspecified'}</p>
+                        <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:1rem;">${v.description || ''}</p>
+                    </div>
+                    <div style="display:flex; gap:0.5rem;">
+                        <button class="btn btn-primary btn-sm" onclick="applyToJob(${v.vacancyId})">Apply Now</button>
+                        ${currentJobSeeker ? `<button class="btn btn-secondary btn-sm" onclick="viewMatchScore(${v.vacancyId})">⚡ View AI Match</button>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function applyToJob(vacancyId) {
+            if (!currentJobSeeker) {
+                showToast('Please complete your profile before applying.', 'warning');
+                return;
+            }
+
+            try {
+                await apiRequest(`/applications/apply?jobSeekerId=${currentJobSeeker.id}&vacancyId=${vacancyId}`, {
+                    method: 'POST'
+                });
+                showToast('Application submitted successfully!', 'success');
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        }
+
+        async function viewMatchScore(vacancyId) {
+            if (!currentJobSeeker) return;
+            try {
+                const match = await apiRequest(`/matching/jobseeker/${currentJobSeeker.id}/vacancy/${vacancyId}`);
+                const modal = document.getElementById('match-modal');
+                const body = document.getElementById('match-modal-body');
+
+                const scoreClass = match.totalScore >= 70 ? 'match-high' : match.totalScore >= 40 ? 'match-med' : 'match-low';
+
+                body.innerHTML = `
+                    <div style="text-align:center; margin-bottom:1.5rem;">
+                        <div class="match-score-pill ${scoreClass}" style="font-size:1.5rem; padding:0.5rem 1.5rem;">
+                            Match Score: ${match.totalScore}%
+                        </div>
+                        <p style="color:var(--text-muted); font-size:0.85rem; margin-top:0.5rem;">Level: ${match.matchLevel}</p>
+                    </div>
+
+                    <h4>Breakdown:</h4>
+                    <ul style="margin:0.75rem 0 1rem 1.25rem; color:var(--text-muted); font-size:0.9rem;">
+                        <li>Skill Weight Match Score: <strong>${match.skillScore}%</strong></li>
+                        <li>Experience Match Score: <strong>${match.experienceScore}%</strong></li>
+                        <li>Education Match Score: <strong>${match.educationScore}%</strong></li>
+                    </ul>
+                `;
+
+                modal.classList.add('active');
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('match-modal').classList.remove('active');
+        }
+
+        async function loadMyApplications() {
+            const list = document.getElementById('applications-list');
+            if (!currentJobSeeker) {
+                list.innerHTML = `<p style="color:var(--text-muted);">Please create your profile first.</p>`;
+                return;
+            }
+
+            try {
+                const apps = await apiRequest(`/applications/jobseeker/${currentJobSeeker.id}`);
+                if (!apps || apps.length === 0) {
+                    list.innerHTML = `<p style="color:var(--text-muted);">You haven't submitted any applications yet.</p>`;
+                    return;
+                }
+
+                list.innerHTML = `
+                    <table style="width:100%; border-collapse:collapse; text-align:left; font-size:0.9rem;">
+                        <thead>
+                            <tr style="border-bottom:1px solid var(--border-color); color:var(--text-muted);">
+                                <th style="padding:0.75rem;">Vacancy ID</th>
+                                <th style="padding:0.75rem;">Applied Date</th>
+                                <th style="padding:0.75rem;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${apps.map(a => `
+                                <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                                    <td style="padding:0.75rem;">Vacancy #${a.vacancyId}</td>
+                                    <td style="padding:0.75rem;">${new Date(a.appliedDate).toLocaleDateString()}</td>
+                                    <td style="padding:0.75rem;">
+                                        <span class="badge ${a.status === 'Accepted' ? 'badge-success' : a.status === 'Rejected' ? 'badge-danger' : 'badge-warning'}">
+                                            ${a.status}
+                                        </span>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            } catch (err) {
+                list.innerHTML = `<p style="color:var(--danger)">${err.message}</p>`;
+            }
+        }
+
+        function populateProfileForm() {
+            if (!currentJobSeeker) return;
+            document.getElementById('prof-name').value = currentJobSeeker.fullName || '';
+            document.getElementById('prof-phone').value = currentJobSeeker.phoneNumber || '';
+            document.getElementById('prof-bio').value = currentJobSeeker.summary || '';
+        }
+
+        document.getElementById('profile-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const fullName = document.getElementById('prof-name').value.trim();
+            const phoneNumber = document.getElementById('prof-phone').value.trim();
+            const summary = document.getElementById('prof-bio').value.trim();
+
+            try {
+                if (currentJobSeeker) {
+                    await apiRequest(`/jobseekers/profile/${currentJobSeeker.id}`, {
+                        method: 'PUT',
+                        body: { fullName, phoneNumber, summary }
+                    });
+                    showToast('Profile updated successfully!', 'success');
+                } else {
+                    const created = await apiRequest(`/jobseekers/profile/1`, {
+                        method: 'POST',
+                        body: { fullName, phoneNumber, summary }
+                    });
+                    currentJobSeeker = created;
+                    showToast('Profile created successfully!', 'success');
+                }
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        });
+
+        async function loadCV() {
+            const section = document.getElementById('cv-section');
+            if (!currentJobSeeker) {
+                section.innerHTML = `<p style="color:var(--text-muted);">Please create your profile first to upload a CV.</p>`;
+                return;
+            }
+
+            try {
+                const cv = await apiRequest(`/jobseekers/cv/${currentJobSeeker.id}`);
+                section.innerHTML = `
+                    <div style="background:var(--bg-input); padding:1rem; border-radius:var(--radius-md);">
+                        <p style="font-weight:600; color:var(--success);">📄 CV Uploaded</p>
+                        <p style="font-size:0.85rem; color:var(--text-muted); margin-top:0.25rem;">File: ${cv.fileName || 'Attached CV'}</p>
+                    </div>
+                `;
+            } catch (err) {
+                section.innerHTML = `<p style="color:var(--text-muted);">No CV uploaded yet.</p>`;
+            }
+        }
+
+        document.getElementById('cv-upload-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentJobSeeker) {
+                showToast('Please create profile before uploading CV.', 'warning');
+                return;
+            }
+
+            const fileInput = document.getElementById('cv-file');
+            if (!fileInput.files || fileInput.files.length === 0) return;
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            try {
+                await apiRequest(`/jobseekers/cv/${currentJobSeeker.id}/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+                showToast('CV uploaded successfully!', 'success');
+                loadCV();
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        });
+
+        async function loadNotifications() {
+            const list = document.getElementById('notifications-list');
+            try {
+                const notifs = await apiRequest('/notifications');
+                if (!notifs || notifs.length === 0) {
+                    list.innerHTML = `<p style="color:var(--text-muted);">No notifications.</p>`;
+                    return;
+                }
+
+                list.innerHTML = notifs.map(n => `
+                    <div style="padding:0.75rem 1rem; border-bottom:1px solid var(--border-color); background:${n.isRead ? 'transparent' : 'rgba(99,102,241,0.1)'};">
+                        <strong>${n.title}</strong>
+                        <p style="font-size:0.88rem; color:var(--text-muted); margin-top:0.25rem;">${n.message}</p>
+                    </div>
+                `).join('');
+            } catch (err) {
+                list.innerHTML = `<p style="color:var(--danger)">${err.message}</p>`;
+            }
+        }
+    </script>
 </body>
 </html>

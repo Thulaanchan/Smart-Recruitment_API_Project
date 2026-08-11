@@ -1,10 +1,124 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Recruitment Matching Platform</title>
+    <title>Register - Smart Recruitment Matching Platform</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        .auth-container {
+            max-width: 480px;
+            margin: 3rem auto;
+        }
+
+        .role-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .role-option {
+            padding: 0.75rem;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .role-option.active {
+            border-color: var(--primary);
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+    </style>
 </head>
 <body>
+    <div id="navbar-container"></div>
+
+    <main class="container">
+        <div class="auth-container">
+            <div class="card">
+                <div style="text-align:center; margin-bottom:1.5rem;">
+                    <h2>Create an Account</h2>
+                    <p style="color:var(--text-muted); font-size:0.9rem;">Join the intelligent recruitment platform</p>
+                </div>
+
+                <div class="role-selector">
+                    <div class="role-option active" id="opt-jobseeker" onclick="selectRole('JobSeeker')">
+                        👨‍💻 Job Seeker
+                    </div>
+                    <div class="role-option" id="opt-employer" onclick="selectRole('Employer')">
+                        🏢 Employer
+                    </div>
+                </div>
+
+                <form id="register-form">
+                    <input type="hidden" id="role" value="JobSeeker">
+
+                    <div class="form-group">
+                        <label class="form-label" for="username">Username</label>
+                        <input type="text" id="username" class="form-control" placeholder="Choose a username" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="email">Email Address</label>
+                        <input type="email" id="email" class="form-control" placeholder="name@example.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="password">Password</label>
+                        <input type="password" id="password" class="form-control" placeholder="Minimum 6 characters" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width:100%; margin-top:1rem;">Register Now</button>
+                </form>
+
+                <div style="text-align:center; margin-top:1.5rem; font-size:0.9rem; color:var(--text-muted);">
+                    Already have an account? <a href="/pages/auth/login.html">Sign in</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="/js/api.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            renderNavbar();
+            const urlParams = new URLSearchParams(window.location.search);
+            const role = urlParams.get('role');
+            if (role === 'Employer') {
+                selectRole('Employer');
+            }
+        });
+
+        function selectRole(role) {
+            document.getElementById('role').value = role;
+            document.getElementById('opt-jobseeker').classList.toggle('active', role === 'JobSeeker');
+            document.getElementById('opt-employer').classList.toggle('active', role === 'Employer');
+        }
+
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const role = document.getElementById('role').value;
+
+            try {
+                await apiRequest('/Auth/register', {
+                    method: 'POST',
+                    body: { username, email, password, role }
+                });
+
+                showToast('Registration successful! Please sign in.', 'success');
+                setTimeout(() => window.location.href = '/pages/auth/login.html', 1200);
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        });
+    </script>
 </body>
 </html>

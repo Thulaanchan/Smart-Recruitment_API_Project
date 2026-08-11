@@ -1,10 +1,95 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Recruitment Matching Platform</title>
+    <title>Admin Dashboard - Smart Recruitment Platform</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            padding: 1.5rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .stat-num {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--primary);
+            font-family: var(--font-heading);
+        }
+    </style>
 </head>
 <body>
+    <div id="navbar-container"></div>
+
+    <main class="container">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
+            <div>
+                <h2>Administrator Control Center</h2>
+                <p style="color:var(--text-muted);">Platform metrics, system monitoring, and governance</p>
+            </div>
+            <span class="badge badge-success" style="padding:0.5rem 1rem; font-size:0.85rem;">System Operational</span>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-num" id="adm-users">0</div>
+                <div style="font-size:0.85rem; color:var(--text-muted);">Registered Users</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-num" id="adm-jobseekers" style="color:var(--info);">0</div>
+                <div style="font-size:0.85rem; color:var(--text-muted);">Job Seekers</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-num" id="adm-employers" style="color:var(--accent);">0</div>
+                <div style="font-size:0.85rem; color:var(--text-muted);">Employers</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-num" id="adm-vacancies" style="color:var(--success);">0</div>
+                <div style="font-size:0.85rem; color:var(--text-muted);">Active Vacancies</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>System Status Summary</h3>
+            <p style="color:var(--text-muted); margin-top:0.5rem;" id="adm-summary">Loading system analytics...</p>
+        </div>
+    </main>
+
+    <script src="/js/api.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            renderNavbar('dashboard');
+            if (!Auth.isAuthenticated() || !Auth.hasRole('Administrator')) {
+                Auth.logout();
+                return;
+            }
+            loadAdminStats();
+        });
+
+        async function loadAdminStats() {
+            try {
+                const stats = await apiRequest('/admin/dashboard');
+                document.getElementById('adm-users').textContent = stats.totalUsers || 0;
+                document.getElementById('adm-jobseekers').textContent = stats.totalJobSeekers || 0;
+                document.getElementById('adm-employers').textContent = stats.totalEmployers || 0;
+                document.getElementById('adm-vacancies').textContent = stats.totalVacancies || 0;
+
+                document.getElementById('adm-summary').textContent = `Total Applications Processed: ${stats.totalApplications || 0} | Matching Engine Status: Healthy`;
+            } catch (err) {
+                document.getElementById('adm-summary').textContent = `Failed to fetch admin metrics: ${err.message}`;
+            }
+        }
+    </script>
 </body>
 </html>

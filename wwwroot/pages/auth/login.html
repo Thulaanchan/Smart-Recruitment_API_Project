@@ -1,10 +1,95 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Recruitment Matching Platform</title>
+    <title>Login - Smart Recruitment Matching Platform</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        .auth-container {
+            max-width: 440px;
+            margin: 4rem auto;
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+    </style>
 </head>
 <body>
+    <div id="navbar-container"></div>
+
+    <main class="container">
+        <div class="auth-container">
+            <div class="card">
+                <div class="auth-header">
+                    <h2>Welcome Back</h2>
+                    <p style="color:var(--text-muted); font-size:0.9rem;">Sign in to access your recruitment portal</p>
+                </div>
+
+                <form id="login-form">
+                    <div class="form-group">
+                        <label class="form-label" for="username">Username or Email</label>
+                        <input type="text" id="username" class="form-control" placeholder="Enter your username" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="password">Password</label>
+                        <input type="password" id="password" class="form-control" placeholder="Enter your password" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width:100%; margin-top:1rem;">Sign In</button>
+                </form>
+
+                <div style="text-align:center; margin-top:1.5rem; font-size:0.9rem; color:var(--text-muted);">
+                    Don't have an account? <a href="/pages/auth/register.html">Register here</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="/js/api.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            renderNavbar();
+            if (Auth.isAuthenticated()) {
+                redirectByRole(Auth.getUser()?.role);
+            }
+        });
+
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+
+            try {
+                const res = await apiRequest('/Auth/login', {
+                    method: 'POST',
+                    body: { username, password }
+                });
+
+                Auth.setToken(res.token);
+                Auth.setUser({
+                    userId: res.userId,
+                    username: res.username,
+                    email: res.email,
+                    role: res.role
+                });
+
+                showToast('Login successful! Redirecting...', 'success');
+                setTimeout(() => redirectByRole(res.role), 800);
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        });
+
+        function redirectByRole(role) {
+            if (role === 'JobSeeker') window.location.href = '/pages/jobseeker/dashboard.html';
+            else if (role === 'Employer') window.location.href = '/pages/employer/dashboard.html';
+            else if (role === 'Administrator') window.location.href = '/pages/admin/dashboard.html';
+            else window.location.href = '/';
+        }
+    </script>
 </body>
 </html>

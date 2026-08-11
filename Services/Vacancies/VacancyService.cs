@@ -112,6 +112,51 @@ namespace SmartRecruitmentMatchingPlatform.API.Services.Vacancies
             return result;
         }
 
+        public async Task<IEnumerable<EmployerVacancyDto>> SearchVacanciesAsync(
+            string? keyword,
+            string? location,
+            string? skills)
+        {
+            var query = _context.Vacancies
+                .Include(v => v.VacancySkills)
+                    .ThenInclude(vs => vs.Skill)
+                .AsNoTracking()
+                .Where(v => v.IsActive);
+
+            if (!string.IsNullOrWhiteSpace(keyword))
+            {
+                var kw = keyword.Trim().ToLower();
+                query = query.Where(v => v.Title.ToLower().Contains(kw) || (v.Description != null && v.Description.ToLower().Contains(kw)));
+            }
+
+            if (!string.IsNullOrWhiteSpace(location))
+            {
+                var loc = location.Trim().ToLower();
+                query = query.Where(v => v.Location != null && v.Location.ToLower().Contains(loc));
+            }
+
+            if (!string.IsNullOrWhiteSpace(skills))
+            {
+                var skillList = skills.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
+                                      .Select(s => s.Trim().ToLower())
+                                      .Where(s => !string.IsNullOrEmpty(s))
+                                      .ToList();
+
+                if (skillList.Any())
+                {
+                    query = query.Where(v => v.VacancySkills.Any(vs => vs.Skill != null && skillList.Contains(vs.Skill.SkillName.ToLower())));
+                }
+            }
+
+            var vacancies = await query.ToListAsync();
+            var result = new List<EmployerVacancyDto>();
+            foreach (var vacancy in vacancies)
+            {
+                result.Add(await MapToEmployerVacancyDtoAsync(vacancy));
+            }
+            return result;
+        }
+
         public async Task<bool> UpdateVacancyAsync(
             int vacancyId,
             int employerId,

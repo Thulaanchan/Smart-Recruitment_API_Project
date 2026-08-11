@@ -43,6 +43,8 @@ using SmartRecruitmentMatchingPlatform.Services.Users;
 // ======================================
 using SmartRecruitmentMatchingPlatform.API.Interfaces.Repositories.Employers;
 using SmartRecruitmentMatchingPlatform.API.Repositories.Employers;
+using SmartRecruitmentMatchingPlatform.API.Interfaces.Services.Employers;
+using SmartRecruitmentMatchingPlatform.API.Services.Employers;
 using SmartRecruitmentMatchingPlatform.API.Interfaces.Repositories.Vacancies;
 using SmartRecruitmentMatchingPlatform.API.Repositories.Vacancies;
 using SmartRecruitmentMatchingPlatform.API.Interfaces.Services.Vacancies;
@@ -326,6 +328,10 @@ builder.Services.AddScoped<
     EmployerRepository>();
 
 builder.Services.AddScoped<
+    IEmployerService,
+    EmployerService>();
+
+builder.Services.AddScoped<
     IVacancyRepository,
     VacancyRepository>();
 
@@ -419,11 +425,15 @@ var app = builder.Build();
 // ======================================
 // HTTP Request Pipeline
 // ======================================
-if (app.Environment.IsDevelopment())
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Smart Recruitment Matching Platform API v1");
+    c.RoutePrefix = "swagger";
+});
+
+app.UseDefaultFiles();
+app.UseStaticFiles();
 
 app.UseHttpsRedirection();
 

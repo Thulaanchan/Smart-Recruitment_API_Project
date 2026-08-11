@@ -1,6 +1,8 @@
 using SmartRecruitmentMatchingPlatform.API.Interfaces.Repositories.Applications;
+using SmartRecruitmentMatchingPlatform.API.Interfaces.Repositories.JobSeekers;
 using SmartRecruitmentMatchingPlatform.API.Interfaces.Repositories.Vacancies;
 using SmartRecruitmentMatchingPlatform.API.Interfaces.Services.Applications;
+using SmartRecruitmentMatchingPlatform.API.Services.Interfaces;
 using SmartRecruitmentMatchingPlatform.API.Models.Entities;
 
 namespace SmartRecruitmentMatchingPlatform.API.Services.Applications
@@ -9,13 +11,19 @@ namespace SmartRecruitmentMatchingPlatform.API.Services.Applications
     {
         private readonly IApplicationRepository _applicationRepository;
         private readonly IVacancyRepository _vacancyRepository;
+        private readonly IJobSeekerRepository _jobSeekerRepository;
+        private readonly INotificationService _notificationService;
 
         public ApplicationService(
             IApplicationRepository applicationRepository,
-            IVacancyRepository vacancyRepository)
+            IVacancyRepository vacancyRepository,
+            IJobSeekerRepository jobSeekerRepository,
+            INotificationService notificationService)
         {
             _applicationRepository = applicationRepository;
             _vacancyRepository = vacancyRepository;
+            _jobSeekerRepository = jobSeekerRepository;
+            _notificationService = notificationService;
         }
 
         public async Task<(bool Success, string Message, Application? Application)> ApplyAsync(
@@ -121,6 +129,26 @@ namespace SmartRecruitmentMatchingPlatform.API.Services.Applications
 
             await _applicationRepository.UpdateAsync(application);
             await _applicationRepository.SaveChangesAsync();
+
+            // Create notification for Job Seeker
+            try
+            {
+                var jobSeeker = await _jobSeekerRepository.GetByIdAsync(application.JobSeekerId);
+                var vacancy = await _vacancyRepository.GetByIdAsync(application.VacancyId);
+
+                if (jobSeeker != null)
+                {
+                    string vacancyTitle = vacancy != null ? vacancy.Title : "Vacancy #" + application.VacancyId;
+                    string title = "Application Status Updated";
+                    string message = $"Your application status for {vacancyTitle} was updated to {status}.";
+
+                    await _notificationService.CreateNotificationAsync(jobSeeker.UserId, title, message);
+                }
+            }
+            catch
+            {
+                // Silently ignore notification failure if notification engine encounters minor error so application update persists safely
+            }
 
             return true;
         }

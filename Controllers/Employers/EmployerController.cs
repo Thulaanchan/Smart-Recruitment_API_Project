@@ -1,31 +1,45 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SmartRecruitmentMatchingPlatform.API.Interfaces.Services.Employers;
 using SmartRecruitmentMatchingPlatform.API.Models.DTOs.Employers;
 
 namespace SmartRecruitmentMatchingPlatform.API.Controllers.Employers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    [Authorize(Roles = "Employer")]
     public class EmployerController : ControllerBase
     {
-        public EmployerController()
+        private readonly IEmployerService _employerService;
+
+        public EmployerController(IEmployerService employerService)
         {
+            _employerService = employerService;
         }
 
         // GET: api/employer/profile
         [HttpGet("profile")]
-        public IActionResult GetProfile()
+        public async Task<IActionResult> GetProfile()
         {
-            return Ok(new
+            var userId = GetCurrentUserId();
+            if (userId == null)
             {
-                message = "Employer profile endpoint is working."
-            });
+                return Unauthorized(new { message = "Invalid token user." });
+            }
+
+            var profile = await _employerService.GetByUserIdAsync(userId.Value);
+            if (profile == null)
+            {
+                return NotFound(new { message = "Employer profile not found." });
+            }
+
+            return Ok(profile);
         }
 
         // PUT: api/employer/profile
         [HttpPut("profile")]
-        public IActionResult UpdateProfile(
+        public async Task<IActionResult> UpdateProfile(
             [FromBody] UpdateEmployerProfileDto model)
         {
             if (!ModelState.IsValid)
@@ -33,11 +47,55 @@ namespace SmartRecruitmentMatchingPlatform.API.Controllers.Employers
                 return BadRequest(ModelState);
             }
 
-            return Ok(new
+            var userId = GetCurrentUserId();
+            if (userId == null)
             {
-                message = "Employer profile update endpoint is working.",
-                data = model
-            });
+                return Unauthorized(new { message = "Invalid token user." });
+            }
+
+            var existingProfile = await _employerService.GetByUserIdAsync(userId.Value);
+            if (existingProfile == null)
+            {
+                return NotFound(new { message = "Employer profile not found." });
+            }
+
+            var updated = await _employerService.UpdateEmployerAsync(existingProfile.EmployerId, model);
+            if (updated == null)
+            {
+                return BadRequest(new { message = "Failed to update profile." });
+            }
+
+            return Ok(updated);
+        }
+
+        // GET: api/employer/dashboard
+        [HttpGet("dashboard")]
+        public async Task<IActionResult> GetDashboard()
+        {
+            var userId = GetCurrentUserId();
+            if (userId == null)
+            {
+                return Unauthorized(new { message = "Invalid token user." });
+            }
+
+            var profile = await _employerService.GetByUserIdAsync(userId.Value);
+            if (profile == null)
+            {
+                return NotFound(new { message = "Employer profile not found." });
+            }
+
+            var dashboard = await _employerService.GetDashboardAsync(profile.EmployerId);
+            return Ok(dashboard);
+        }
+
+        private int? GetCurrentUserId()
+        {
+            var claim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (int.TryParse(claim, out int userId))
+            {
+                return userId;
+            }
+            return null;
         }
     }
 }

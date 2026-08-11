@@ -31,6 +31,18 @@ namespace SmartRecruitmentMatchingPlatform.API.Controllers.Vacancies
             return Ok(vacancies);
         }
 
+        // GET: api/vacancy/search
+        [AllowAnonymous]
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchVacancies(
+            [FromQuery] string? keyword,
+            [FromQuery] string? location,
+            [FromQuery] string? skills)
+        {
+            var vacancies = await _vacancyService.SearchVacanciesAsync(keyword, location, skills);
+            return Ok(vacancies);
+        }
+
         // GET: api/vacancy/5
         [AllowAnonymous]
         [HttpGet("{id:int}")]

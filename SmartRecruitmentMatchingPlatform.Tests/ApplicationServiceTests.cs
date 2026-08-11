@@ -1,6 +1,9 @@
 using Moq;
 using SmartRecruitmentMatchingPlatform.API.Interfaces.Repositories.Applications;
+using SmartRecruitmentMatchingPlatform.API.Interfaces.Repositories.JobSeekers;
 using SmartRecruitmentMatchingPlatform.API.Interfaces.Repositories.Vacancies;
+using SmartRecruitmentMatchingPlatform.API.Interfaces.Services.Applications;
+using SmartRecruitmentMatchingPlatform.API.Services.Interfaces;
 using SmartRecruitmentMatchingPlatform.API.Models.Entities;
 using SmartRecruitmentMatchingPlatform.API.Services.Applications;
 
@@ -14,11 +17,13 @@ namespace SmartRecruitmentMatchingPlatform.Tests
             // Arrange
             var appRepoMock = new Mock<IApplicationRepository>();
             var vacancyRepoMock = new Mock<IVacancyRepository>();
+            var jobSeekerRepoMock = new Mock<IJobSeekerRepository>();
+            var notificationServiceMock = new Mock<INotificationService>();
 
             vacancyRepoMock.Setup(v => v.ExistsAsync(10)).ReturnsAsync(true);
             appRepoMock.Setup(a => a.HasAppliedAsync(1, 10)).ReturnsAsync(true);
 
-            var service = new ApplicationService(appRepoMock.Object, vacancyRepoMock.Object);
+            var service = new ApplicationService(appRepoMock.Object, vacancyRepoMock.Object, jobSeekerRepoMock.Object, notificationServiceMock.Object);
 
             // Act
             var (success, message, app) = await service.ApplyAsync(1, 10);
@@ -35,11 +40,13 @@ namespace SmartRecruitmentMatchingPlatform.Tests
             // Arrange
             var appRepoMock = new Mock<IApplicationRepository>();
             var vacancyRepoMock = new Mock<IVacancyRepository>();
+            var jobSeekerRepoMock = new Mock<IJobSeekerRepository>();
+            var notificationServiceMock = new Mock<INotificationService>();
 
             vacancyRepoMock.Setup(v => v.ExistsAsync(10)).ReturnsAsync(true);
             appRepoMock.Setup(a => a.HasAppliedAsync(1, 10)).ReturnsAsync(false);
 
-            var service = new ApplicationService(appRepoMock.Object, vacancyRepoMock.Object);
+            var service = new ApplicationService(appRepoMock.Object, vacancyRepoMock.Object, jobSeekerRepoMock.Object, notificationServiceMock.Object);
 
             // Act
             var (success, message, app) = await service.ApplyAsync(1, 10);

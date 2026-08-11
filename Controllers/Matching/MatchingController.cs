@@ -1,5 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SmartRecruitmentMatchingPlatform.API.Interfaces.Repositories.Employers;
+using SmartRecruitmentMatchingPlatform.API.Interfaces.Repositories.JobSeekers;
+using SmartRecruitmentMatchingPlatform.API.Interfaces.Repositories.Vacancies;
 using SmartRecruitmentMatchingPlatform.API.Interfaces.Services.Matching;
 
 namespace SmartRecruitmentMatchingPlatform.API.Controllers.Matching
@@ -10,19 +14,29 @@ namespace SmartRecruitmentMatchingPlatform.API.Controllers.Matching
     public class MatchingController : ControllerBase
     {
         private readonly IMatchingService _matchingService;
+        private readonly IJobSeekerRepository _jobSeekerRepository;
+        private readonly IEmployerRepository _employerRepository;
+        private readonly IVacancyRepository _vacancyRepository;
 
-        public MatchingController(IMatchingService matchingService)
+        public MatchingController(
+            IMatchingService matchingService,
+            IJobSeekerRepository jobSeekerRepository,
+            IEmployerRepository employerRepository,
+            IVacancyRepository vacancyRepository)
         {
             _matchingService = matchingService;
+            _jobSeekerRepository = jobSeekerRepository;
+            _employerRepository = employerRepository;
+            _vacancyRepository = vacancyRepository;
         }
 
-        // GET: api/matching
-        [HttpGet]
+        // GET: api/matching/status
+        [HttpGet("status")]
         public IActionResult GetMatchingStatus()
         {
             return Ok(new
             {
-                message = "Matching endpoint is working."
+                message = "Matching service is operational."
             });
         }
 
@@ -38,6 +52,29 @@ namespace SmartRecruitmentMatchingPlatform.API.Controllers.Matching
                 {
                     message = "Invalid job seeker ID or vacancy ID."
                 });
+            }
+
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(userIdClaim, out int userId))
+            {
+                return Unauthorized(new { message = "Invalid user token." });
+            }
+
+            if (User.IsInRole("JobSeeker"))
+            {
+                var jobSeeker = await _jobSeekerRepository.GetByUserIdAsync(userId);
+                if (jobSeeker == null || jobSeeker.Id != jobSeekerId)
+                {
+                    return Forbid();
+                }
+            }
+            else if (User.IsInRole("Employer"))
+            {
+                var employer = await _employerRepository.GetByUserIdAsync(userId);
+                if (employer == null || !await _vacancyRepository.BelongsToEmployerAsync(vacancyId, employer.EmployerId))
+                {
+                    return Forbid();
+                }
             }
 
             var result = await _matchingService.GetMatchAsync(
@@ -56,6 +93,7 @@ namespace SmartRecruitmentMatchingPlatform.API.Controllers.Matching
         }
 
         // GET: api/matching/vacancy/5/ranked-candidates
+        [Authorize(Roles = "Employer,Administrator")]
         [HttpGet("vacancy/{vacancyId:int}/ranked-candidates")]
         public async Task<IActionResult> GetRankedCandidates(
             int vacancyId)
@@ -68,8 +106,22 @@ namespace SmartRecruitmentMatchingPlatform.API.Controllers.Matching
                 });
             }
 
-            var candidates =
-                await _matchingService.GetRankedCandidatesAsync(vacancyId);
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(userIdClaim, out int userId))
+            {
+                return Unauthorized(new { message = "Invalid user token." });
+            }
+
+            if (User.IsInRole("Employer"))
+            {
+                var employer = await _employerRepository.GetByUserIdAsync(userId);
+                if (employer == null || !await _vacancyRepository.BelongsToEmployerAsync(vacancyId, employer.EmployerId))
+                {
+                    return Forbid();
+                }
+            }
+
+            var candidates = await _matchingService.GetRankedCandidatesAsync(vacancyId);
 
             return Ok(candidates);
         }

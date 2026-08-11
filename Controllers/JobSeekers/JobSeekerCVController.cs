@@ -1,25 +1,25 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using SmartRecruitmentMatchingPlatform.API.Interfaces.Repositories.JobSeekers;
 using SmartRecruitmentMatchingPlatform.API.Interfaces.Services.JobSeekers;
-
-// JWT Authentication module ready ஆன பிறகு இதை மீண்டும் use பண்ணலாம்
-// using Microsoft.AspNetCore.Authorization;
 
 namespace SmartRecruitmentMatchingPlatform.API.Controllers.JobSeekers
 {
     [ApiController]
     [Route("api/jobseekers/cv")]
-
-    // TEMPORARY - Swagger testing
-    // JWT setup முடிந்த பிறகு uncomment பண்ண வேண்டும்
-    // [Authorize(Roles = "JobSeeker")]
-
+    [Authorize(Roles = "JobSeeker")]
     public class JobSeekerCVController : ControllerBase
     {
         private readonly ICVService _cvService;
+        private readonly IJobSeekerRepository _jobSeekerRepository;
 
-        public JobSeekerCVController(ICVService cvService)
+        public JobSeekerCVController(
+            ICVService cvService,
+            IJobSeekerRepository jobSeekerRepository)
         {
             _cvService = cvService;
+            _jobSeekerRepository = jobSeekerRepository;
         }
 
         // POST: api/jobseekers/cv/{jobSeekerId}/upload
@@ -28,6 +28,12 @@ namespace SmartRecruitmentMatchingPlatform.API.Controllers.JobSeekers
             int jobSeekerId,
             IFormFile file)
         {
+            var authResult = await AuthorizeJobSeekerAsync(jobSeekerId);
+            if (authResult != null)
+            {
+                return authResult;
+            }
+
             if (file == null || file.Length == 0)
             {
                 return BadRequest(new
@@ -94,6 +100,12 @@ namespace SmartRecruitmentMatchingPlatform.API.Controllers.JobSeekers
         public async Task<IActionResult> GetCV(
             int jobSeekerId)
         {
+            var authResult = await AuthorizeJobSeekerAsync(jobSeekerId);
+            if (authResult != null)
+            {
+                return authResult;
+            }
+
             var cv =
                 await _cvService.GetCVAsync(jobSeekerId);
 
@@ -113,6 +125,12 @@ namespace SmartRecruitmentMatchingPlatform.API.Controllers.JobSeekers
         public async Task<IActionResult> DeleteCV(
             int jobSeekerId)
         {
+            var authResult = await AuthorizeJobSeekerAsync(jobSeekerId);
+            if (authResult != null)
+            {
+                return authResult;
+            }
+
             var deleted =
                 await _cvService.DeleteCVAsync(jobSeekerId);
 
@@ -128,6 +146,23 @@ namespace SmartRecruitmentMatchingPlatform.API.Controllers.JobSeekers
             {
                 message = "CV deleted successfully."
             });
+        }
+
+        private async Task<IActionResult?> AuthorizeJobSeekerAsync(int requestedJobSeekerId)
+        {
+            var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!int.TryParse(userIdValue, out var userId))
+            {
+                return Unauthorized(new { message = "Invalid authenticated user." });
+            }
+
+            var currentJobSeeker = await _jobSeekerRepository.GetByUserIdAsync(userId);
+            if (currentJobSeeker == null || currentJobSeeker.Id != requestedJobSeekerId)
+            {
+                return Forbid();
+            }
+
+            return null;
         }
     }
 }

@@ -1,10 +1,196 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Recruitment Matching Platform</title>
+    <title>Smart Recruitment Matching Platform - AI Powered Career Portal</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        .hero {
+            padding: 5rem 1rem 4rem;
+            text-align: center;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1.15;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #ffffff 30%, #a5b4fc 70%, #c084fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            margin-bottom: 2.5rem;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 0.75rem;
+            max-width: 700px;
+            margin: 0 auto 3rem;
+            background: var(--bg-card);
+            padding: 0.75rem;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-card);
+        }
+
+        .search-box input {
+            border: none;
+            background: transparent;
+            color: white;
+            font-size: 1rem;
+            padding: 0.5rem 1rem;
+            flex: 1;
+        }
+
+        .search-box input:focus {
+            outline: none;
+        }
+
+        .role-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .role-card {
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .role-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--primary-light);
+            color: var(--primary);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1.25rem;
+        }
+    </style>
 </head>
 <body>
+    <div id="navbar-container"></div>
+
+    <main class="container">
+        <section class="hero">
+            <span class="badge badge-primary" style="margin-bottom: 1rem;">⚡ Intelligent Candidate & Vacancy Engine</span>
+            <h1>Connect Talent with Opportunity via AI Skill Matching</h1>
+            <p>Our recruitment platform analyzes skill compatibility, experience background, and job requirements to rank candidates with precision accuracy.</p>
+
+            <div class="search-box">
+                <input type="text" id="home-search-kw" placeholder="Job title, skill (e.g. .NET, React, SQL)...">
+                <button class="btn btn-primary" onclick="searchJobs()">Search Vacancies</button>
+            </div>
+        </section>
+
+        <section style="margin-bottom: 4rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1.5rem;">
+                <h2>Explore Active Vacancies</h2>
+                <span class="badge badge-success" id="vacancies-count">Loading vacancies...</span>
+            </div>
+
+            <div id="vacancies-grid" class="grid grid-3">
+                <div class="card" style="text-align:center; padding:3rem;">
+                    <p style="color:var(--text-muted);">Fetching available job openings...</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="role-cards">
+            <div class="card role-card card-interactive">
+                <div class="feature-icon">🚀</div>
+                <h3>For Job Seekers</h3>
+                <p style="color:var(--text-muted); margin: 0.75rem 0 1.5rem;">Upload your CV, build your interactive profile, get candidate match scores for open positions, and track applications seamlessly.</p>
+                <a href="/pages/auth/register.html?role=JobSeeker" class="btn btn-outline btn-sm">Create Job Seeker Account →</a>
+            </div>
+
+            <div class="card role-card card-interactive">
+                <div class="feature-icon">🏢</div>
+                <h3>For Employers</h3>
+                <p style="color:var(--text-muted); margin: 0.75rem 0 1.5rem;">Publish vacancy listings, specify required skills and weights, inspect AI-ranked candidate scorecards, and streamline hiring workflows.</p>
+                <a href="/pages/auth/register.html?role=Employer" class="btn btn-primary btn-sm">Post Vacancies & Hire →</a>
+            </div>
+        </section>
+    </main>
+
+    <script src="/js/api.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            renderNavbar();
+            loadVacancies();
+        });
+
+        async function loadVacancies(keyword = '') {
+            const grid = document.getElementById('vacancies-grid');
+            const countBadge = document.getElementById('vacancies-count');
+
+            try {
+                const endpoint = keyword ? `/vacancy/search?keyword=${encodeURIComponent(keyword)}` : '/vacancy';
+                const vacancies = await apiRequest(endpoint);
+
+                countBadge.textContent = `${vacancies.length} Active Vacancies`;
+
+                if (!vacancies || vacancies.length === 0) {
+                    grid.innerHTML = `<div class="card" style="grid-column: 1/-1; text-align:center; padding:3rem;">
+                        <p style="color:var(--text-muted);">No vacancies found matching your search.</p>
+                    </div>`;
+                    return;
+                }
+
+                grid.innerHTML = vacancies.map(v => `
+                    <div class="card card-interactive" style="display:flex; flex-direction:column; justify-content:space-between;">
+                        <div>
+                            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.75rem;">
+                                <h3 style="font-size:1.15rem; margin-right:0.5rem;">${v.title}</h3>
+                                <span class="badge badge-primary">${v.vacancyType || 'Full-time'}</span>
+                            </div>
+                            <p style="font-size:0.88rem; color:var(--primary); font-weight:600; margin-bottom:0.5rem;">🏢 ${v.companyName || 'Featured Company'}</p>
+                            <p style="font-size:0.85rem; color:var(--text-dim); margin-bottom:1rem;">📍 ${v.location || 'Remote / Unspecified'}</p>
+                            <p style="font-size:0.9rem; color:var(--text-muted); display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; margin-bottom:1rem;">${v.description || 'No description provided.'}</p>
+                        </div>
+                        <div>
+                            <div style="display:flex; flex-wrap:wrap; gap:0.35rem; margin-bottom:1.25rem;">
+                                ${(v.skills || []).map(s => `<span class="badge badge-secondary" style="background:rgba(255,255,255,0.06); font-size:0.72rem;">${s}</span>`).join('')}
+                            </div>
+                            <a href="/pages/auth/login.html" class="btn btn-outline btn-sm" style="width:100%;">Apply / View Details</a>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                grid.innerHTML = `<div class="card" style="grid-column: 1/-1; text-align:center; padding:2rem; color:var(--danger);">
+                    Failed to load vacancies: ${err.message}
+                </div>`;
+            }
+        }
+
+        function searchJobs() {
+            const kw = document.getElementById('home-search-kw').value;
+            loadVacancies(kw);
+        }
+    </script>
 </body>
 </html>

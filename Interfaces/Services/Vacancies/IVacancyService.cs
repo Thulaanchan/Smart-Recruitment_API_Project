@@ -16,6 +16,11 @@ namespace SmartRecruitmentMatchingPlatform.API.Interfaces.Services.Vacancies
 
         Task<IEnumerable<EmployerVacancyDto>> GetAllVacanciesAsync();
 
+        Task<IEnumerable<EmployerVacancyDto>> SearchVacanciesAsync(
+            string? keyword,
+            string? location,
+            string? skills);
+
         Task<bool> UpdateVacancyAsync(
             int vacancyId,
             int employerId,
