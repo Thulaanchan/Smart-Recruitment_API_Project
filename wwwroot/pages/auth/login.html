@@ -2,94 +2,350 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Smart Recruitment Matching Platform</title>
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>
+        Login - Smart Recruitment Matching Platform
+    </title>
+
     <link rel="stylesheet" href="/css/styles.css">
+
     <style>
         .auth-container {
             max-width: 440px;
             margin: 4rem auto;
         }
-
-        .auth-header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
     </style>
 </head>
+
 <body>
+
     <div id="navbar-container"></div>
 
     <main class="container">
+
         <div class="auth-container">
+
             <div class="card">
-                <div class="auth-header">
+
+                <div style="
+                    text-align:center;
+                    margin-bottom:1.5rem;">
+
                     <h2>Welcome Back</h2>
-                    <p style="color:var(--text-muted); font-size:0.9rem;">Sign in to access your recruitment portal</p>
+
+                    <p style="
+                        color:var(--text-muted);
+                        font-size:0.9rem;">
+
+                        Sign in to access your recruitment portal
+                    </p>
+
                 </div>
+
 
                 <form id="login-form">
-                    <div class="form-group">
-                        <label class="form-label" for="username">Username or Email</label>
-                        <input type="text" id="username" class="form-control" placeholder="Enter your username" required>
-                    </div>
 
                     <div class="form-group">
-                        <label class="form-label" for="password">Password</label>
-                        <input type="password" id="password" class="form-control" placeholder="Enter your password" required>
+
+                        <label class="form-label"
+                               for="email">
+
+                            Email Address
+                        </label>
+
+                        <input type="email"
+                               id="email"
+                               class="form-control"
+                               placeholder="name@example.com"
+                               maxlength="150"
+                               required>
+
                     </div>
 
-                    <button type="submit" class="btn btn-primary" style="width:100%; margin-top:1rem;">Sign In</button>
+
+                    <div class="form-group">
+
+                        <label class="form-label"
+                               for="password">
+
+                            Password
+                        </label>
+
+                        <input type="password"
+                               id="password"
+                               class="form-control"
+                               placeholder="Enter your password"
+                               required>
+
+                    </div>
+
+
+                    <button type="submit"
+                            id="login-button"
+                            class="btn btn-primary"
+                            style="
+                            width:100%;
+                            margin-top:1rem;">
+
+                        Sign In
+                    </button>
+
                 </form>
 
-                <div style="text-align:center; margin-top:1.5rem; font-size:0.9rem; color:var(--text-muted);">
-                    Don't have an account? <a href="/pages/auth/register.html">Register here</a>
+
+                <div style="
+                    text-align:center;
+                    margin-top:1.5rem;
+                    font-size:0.9rem;
+                    color:var(--text-muted);">
+
+                    Don't have an account?
+
+                    <a href="/pages/auth/register.html">
+                        Register here
+                    </a>
+
                 </div>
+
             </div>
+
         </div>
+
     </main>
 
+
     <script src="/js/api.js"></script>
+
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            renderNavbar();
-            if (Auth.isAuthenticated()) {
-                redirectByRole(Auth.getUser()?.role);
+
+        document.addEventListener(
+            'DOMContentLoaded',
+            () => {
+
+                renderNavbar();
+
+                if (Auth.isAuthenticated()) {
+
+                    const currentUser =
+                        Auth.getUser();
+
+                    redirectByRole(
+                        currentUser?.role
+                    );
+                }
             }
-        });
+        );
 
-        document.getElementById('login-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value;
 
-            try {
-                const res = await apiRequest('/Auth/login', {
-                    method: 'POST',
-                    body: { username, password }
-                });
+        document
+            .getElementById('login-form')
+            .addEventListener(
+                'submit',
+                async (event) => {
 
-                Auth.setToken(res.token);
-                Auth.setUser({
-                    userId: res.userId,
-                    username: res.username,
-                    email: res.email,
-                    role: res.role
-                });
+                    event.preventDefault();
 
-                showToast('Login successful! Redirecting...', 'success');
-                setTimeout(() => redirectByRole(res.role), 800);
-            } catch (err) {
-                showToast(err.message, 'error');
-            }
-        });
+                    const loginButton =
+                        document.getElementById(
+                            'login-button'
+                        );
+
+                    const email =
+                        document.getElementById(
+                            'email'
+                        ).value.trim();
+
+                    const password =
+                        document.getElementById(
+                            'password'
+                        ).value;
+
+
+                    if (!email) {
+
+                        showToast(
+                            'Email address is required.',
+                            'error'
+                        );
+
+                        return;
+                    }
+
+
+                    if (!password) {
+
+                        showToast(
+                            'Password is required.',
+                            'error'
+                        );
+
+                        return;
+                    }
+
+
+                    try {
+
+                        loginButton.disabled = true;
+
+                        loginButton.textContent =
+                            'Signing In...';
+
+
+                        /*
+                            Backend LoginRequestDto expects:
+
+                            Email
+                            Password
+                        */
+
+                        const result =
+                            await apiRequest(
+                                '/auth/login',
+                                {
+                                    method: 'POST',
+
+                                    body: {
+                                        email: email,
+                                        password: password
+                                    }
+                                }
+                            );
+
+
+                        if (!result ||
+                            !result.accessToken) {
+
+                            throw new Error(
+                                'Login response did not contain an access token.'
+                            );
+                        }
+
+
+                        /*
+                            Save JWT access token.
+                        */
+
+                        Auth.setToken(
+                            result.accessToken
+                        );
+
+
+                        /*
+                            Preserve refresh token separately
+                            for future refresh-token use.
+                        */
+
+                        if (result.refreshToken) {
+
+                            localStorage.setItem(
+                                'srm_refresh_token',
+                                result.refreshToken
+                            );
+                        }
+
+
+                        /*
+                            api.js currently expects the user
+                            object to contain "role".
+
+                            It also displays user.username in
+                            the navigation, so map fullName
+                            to username for compatibility.
+                        */
+
+                        const user = {
+
+                            userId:
+                                result.userId,
+
+                            fullName:
+                                result.fullName,
+
+                            username:
+                                result.fullName,
+
+                            email:
+                                result.email,
+
+                            role:
+                                result.role
+                        };
+
+
+                        Auth.setUser(user);
+
+
+                        showToast(
+                            'Login successful!',
+                            'success'
+                        );
+
+
+                        setTimeout(
+                            () => {
+
+                                redirectByRole(
+                                    result.role
+                                );
+
+                            },
+                            500
+                        );
+
+                    }
+                    catch (error) {
+
+                        showToast(
+                            error.message ||
+                            'Login failed.',
+                            'error'
+                        );
+
+                        loginButton.disabled = false;
+
+                        loginButton.textContent =
+                            'Sign In';
+                    }
+                }
+            );
+
 
         function redirectByRole(role) {
-            if (role === 'JobSeeker') window.location.href = '/pages/jobseeker/dashboard.html';
-            else if (role === 'Employer') window.location.href = '/pages/employer/dashboard.html';
-            else if (role === 'Administrator') window.location.href = '/pages/admin/dashboard.html';
-            else window.location.href = '/';
+
+            if (role === 'JobSeeker') {
+
+                window.location.href =
+                    '/pages/jobseeker/dashboard.html';
+
+                return;
+            }
+
+
+            if (role === 'Employer') {
+
+                window.location.href =
+                    '/pages/employer/dashboard.html';
+
+                return;
+            }
+
+
+            if (role === 'Administrator') {
+
+                window.location.href =
+                    '/pages/admin/dashboard.html';
+
+                return;
+            }
+
+
+            Auth.logout();
         }
+
     </script>
+
 </body>
 </html>

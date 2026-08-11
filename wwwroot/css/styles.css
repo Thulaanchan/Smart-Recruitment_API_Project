@@ -54,7 +54,7 @@ body {
     min-height: 100vh;
     overflow-x: hidden;
     line-height: 1.6;
-    background-image: 
+    background-image:
         radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
         radial-gradient(circle at 85% 85%, rgba(139, 92, 246, 0.15) 0%, transparent 40%),
         radial-gradient(circle at 50% 50%, rgba(236, 72, 153, 0.05) 0%, transparent 60%);
@@ -413,4 +413,121 @@ textarea.form-control {
 .tab-btn.active {
     color: var(--primary);
     border-bottom-color: var(--primary);
+}
+
+/* ==========================================================================
+   Professional Light Theme System
+   ========================================================================== */
+[data-theme="light"] {
+    --bg-dark: #f8fafc;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f1f5f9;
+    --bg-input: #ffffff;
+
+    --primary: #4f46e5;
+    --primary-hover: #4338ca;
+    --primary-light: rgba(79, 70, 229, 0.12);
+    --accent: #7c3aed;
+    --accent-pink: #db2777;
+
+    --text-main: #0f172a;
+    --text-muted: #475569;
+    --text-dim: #64748b;
+    --border-color: #e2e8f0;
+
+    --shadow-glow: 0 0 25px rgba(79, 70, 229, 0.2);
+    --shadow-card: 0 10px 30px -5px rgba(0, 0, 0, 0.08);
+
+    background-image:
+        radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 85% 85%, rgba(139, 92, 246, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 50% 50%, rgba(236, 72, 153, 0.03) 0%, transparent 60%);
+}
+
+[data-theme="light"] h1,
+[data-theme="light"] h2,
+[data-theme="light"] h3,
+[data-theme="light"] h4,
+[data-theme="light"] h5,
+[data-theme="light"] h6 {
+    color: #0f172a;
+}
+
+[data-theme="light"] .navbar {
+    background: rgba(255, 255, 255, 0.9);
+    border-bottom: 1px solid #e2e8f0;
+}
+
+[data-theme="light"] .modal {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="light"] .modal-backdrop {
+    background: rgba(15, 23, 42, 0.4);
+}
+
+[data-theme="light"] .form-control {
+    background: #ffffff;
+    border-color: #cbd5e1;
+    color: #0f172a;
+}
+
+[data-theme="light"] .form-control:focus {
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+}
+
+[data-theme="light"] .btn-secondary {
+    background: #f1f5f9;
+    color: #0f172a;
+    border-color: #cbd5e1;
+}
+
+[data-theme="light"] .btn-secondary:hover {
+    background: #e2e8f0;
+}
+
+[data-theme="light"] .toast {
+    background: #ffffff;
+    color: #0f172a;
+    border-color: #e2e8f0;
+}
+
+[data-theme="light"] .role-option {
+    border-color: #cbd5e1;
+    color: #475569;
+}
+
+[data-theme="light"] .role-option.active {
+    border-color: #4f46e5;
+    background: rgba(79, 70, 229, 0.1);
+    color: #4f46e5;
+}
+
+[data-theme="light"] .badge-primary { background: rgba(79, 70, 229, 0.12); color: #4338ca; border: 1px solid rgba(79, 70, 229, 0.3); }
+[data-theme="light"] .badge-success { background: rgba(16, 185, 129, 0.12); color: #047857; border: 1px solid rgba(16, 185, 129, 0.3); }
+[data-theme="light"] .badge-warning { background: rgba(245, 158, 11, 0.12); color: #b45309; border: 1px solid rgba(245, 158, 11, 0.3); }
+[data-theme="light"] .badge-danger  { background: rgba(239, 68, 68, 0.12);  color: #b91c1c; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+.theme-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.45rem 0.85rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-full);
+    color: var(--text-main);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.theme-toggle-btn:hover {
+    border-color: var(--primary);
+    transform: scale(1.03);
 }

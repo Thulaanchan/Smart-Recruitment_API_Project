@@ -3,68 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - Smart Recruitment Platform</title>
+    <title>Administrator Dashboard - Smart Recruitment Platform</title>
     <link rel="stylesheet" href="/css/styles.css">
-    <style>
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1.25rem;
-            margin-bottom: 2rem;
-        }
-
-        .stat-card {
-            background: var(--bg-card);
-            padding: 1.5rem;
-            border-radius: var(--radius-md);
-            border: 1px solid var(--border-color);
-            text-align: center;
-        }
-
-        .stat-num {
-            font-size: 2.2rem;
-            font-weight: 800;
-            color: var(--primary);
-            font-family: var(--font-heading);
-        }
-    </style>
 </head>
 <body>
     <div id="navbar-container"></div>
 
     <main class="container">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; flex-wrap:wrap; gap:1rem;">
             <div>
                 <h2>Administrator Control Center</h2>
-                <p style="color:var(--text-muted);">Platform metrics, system monitoring, and governance</p>
+                <p style="color:var(--text-muted);">Platform statistics, user account administration, and system diagnostics</p>
             </div>
-            <span class="badge badge-success" style="padding:0.5rem 1rem; font-size:0.85rem;">System Operational</span>
+            <span class="badge badge-danger" style="font-size:0.88rem; padding:0.5rem 1rem;">🛡️ Admin Privileges Active</span>
         </div>
 
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-num" id="adm-users">0</div>
-                <div style="font-size:0.85rem; color:var(--text-muted);">Registered Users</div>
+        <!-- Metric Stat Cards -->
+        <div class="grid grid-4" style="margin-bottom:2rem;">
+            <div class="card">
+                <div style="font-size:0.85rem; color:var(--text-muted);">Total Platform Users</div>
+                <div id="adm-users" style="font-size:2rem; font-weight:700; color:var(--primary); margin-top:0.25rem;">0</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-num" id="adm-jobseekers" style="color:var(--info);">0</div>
+            <div class="card">
                 <div style="font-size:0.85rem; color:var(--text-muted);">Job Seekers</div>
+                <div id="adm-jobseekers" style="font-size:2rem; font-weight:700; color:var(--accent); margin-top:0.25rem;">0</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-num" id="adm-employers" style="color:var(--accent);">0</div>
+            <div class="card">
                 <div style="font-size:0.85rem; color:var(--text-muted);">Employers</div>
+                <div id="adm-employers" style="font-size:2rem; font-weight:700; color:var(--info); margin-top:0.25rem;">0</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-num" id="adm-vacancies" style="color:var(--success);">0</div>
-                <div style="font-size:0.85rem; color:var(--text-muted);">Active Vacancies</div>
+            <div class="card">
+                <div style="font-size:0.85rem; color:var(--text-muted);">Vacancies & Applications</div>
+                <div id="adm-vac-apps" style="font-size:1.4rem; font-weight:700; color:var(--success); margin-top:0.25rem;">0 / 0</div>
             </div>
         </div>
 
-        <div class="card">
-            <h3>System Status Summary</h3>
-            <p style="color:var(--text-muted); margin-top:0.5rem;" id="adm-summary">Loading system analytics...</p>
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('users')">👥 User Accounts Management</button>
+            <button class="tab-btn" onclick="switchTab('matching')">⚡ Match Engine Test Diagnostic</button>
+        </div>
+
+        <!-- TAB 1: User Accounts Management -->
+        <div id="tab-users" class="tab-content">
+            <div class="card">
+                <h3>Registered User Accounts</h3>
+                <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:1rem;">Note: Public administrator registration remains strictly blocked. System accounts can be activated or deactivated.</p>
+                <div id="users-table-container">
+                    <p style="color:var(--text-muted);">Loading user accounts...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: Match Engine Diagnostic -->
+        <div id="tab-matching" class="tab-content" style="display:none;">
+            <div class="card" style="max-width:650px; margin:0 auto;">
+                <h3>Deterministic Match Score Inspector</h3>
+                <p style="color:var(--text-muted); font-size:0.88rem; margin-bottom:1.5rem;">Calculate and inspect the exact weighted compatibility breakdown for any Job Seeker and Vacancy ID pair.</p>
+                <form id="admin-match-form">
+                    <div class="grid grid-2">
+                        <div class="form-group">
+                            <label class="form-label">Job Seeker ID</label>
+                            <input type="number" id="adm-js-id" class="form-control" placeholder="e.g. 1" required min="1">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Vacancy ID</label>
+                            <input type="number" id="adm-vac-id" class="form-control" placeholder="e.g. 1" required min="1">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width:100%;">Calculate Match & Skill Gap</button>
+                </form>
+            </div>
         </div>
     </main>
+
+    <!-- Modal for Match Inspection -->
+    <div id="match-modal" class="modal-backdrop">
+        <div class="modal">
+            <h3>Deterministic Candidate Match Score & Analysis</h3>
+            <div id="match-modal-body" style="margin:1.5rem 0;"></div>
+            <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+        </div>
+    </div>
 
     <script src="/js/api.js"></script>
     <script>
@@ -74,21 +93,176 @@
                 Auth.logout();
                 return;
             }
-            loadAdminStats();
+            await initAdmin();
         });
 
-        async function loadAdminStats() {
-            try {
-                const stats = await apiRequest('/admin/dashboard');
-                document.getElementById('adm-users').textContent = stats.totalUsers || 0;
-                document.getElementById('adm-jobseekers').textContent = stats.totalJobSeekers || 0;
-                document.getElementById('adm-employers').textContent = stats.totalEmployers || 0;
-                document.getElementById('adm-vacancies').textContent = stats.totalVacancies || 0;
+        async function initAdmin() {
+            loadDashboardSummary();
+            loadUserAccounts();
+        }
 
-                document.getElementById('adm-summary').textContent = `Total Applications Processed: ${stats.totalApplications || 0} | Matching Engine Status: Healthy`;
-            } catch (err) {
-                document.getElementById('adm-summary').textContent = `Failed to fetch admin metrics: ${err.message}`;
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+
+            if (event && event.target) {
+                event.target.classList.add('active');
             }
+            document.getElementById(`tab-${tabName}`).style.display = 'block';
+        }
+
+        async function loadDashboardSummary() {
+            try {
+                const summary = await apiRequest('/admin/dashboard');
+                document.getElementById('adm-users').textContent = summary.totalUsers || 0;
+                document.getElementById('adm-jobseekers').textContent = summary.totalJobSeekers || 0;
+                document.getElementById('adm-employers').textContent = summary.totalEmployers || 0;
+                document.getElementById('adm-vac-apps').textContent = `${summary.totalVacancies || 0} Vac / ${summary.totalApplications || 0} App`;
+            } catch (err) {
+                console.error('Failed to load admin summary:', err);
+            }
+        }
+
+        async function loadUserAccounts() {
+            const container = document.getElementById('users-table-container');
+            try {
+                const users = await apiRequest('/users');
+                if (!users || users.length === 0) {
+                    container.innerHTML = `<p style="color:var(--text-muted);">No user accounts found in database.</p>`;
+                    return;
+                }
+
+                container.innerHTML = `
+                    <table style="width:100%; border-collapse:collapse; text-align:left; font-size:0.9rem;">
+                        <thead>
+                            <tr style="border-bottom:1px solid var(--border-color); color:var(--text-muted);">
+                                <th style="padding:0.75rem;">User ID</th>
+                                <th style="padding:0.75rem;">Full Name</th>
+                                <th style="padding:0.75rem;">Email</th>
+                                <th style="padding:0.75rem;">Role</th>
+                                <th style="padding:0.75rem;">Status</th>
+                                <th style="padding:0.75rem;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${users.map(u => `
+                                <tr style="border-bottom:1px solid var(--border-color);">
+                                    <td style="padding:0.75rem;">#${u.id || u.userId}</td>
+                                    <td style="padding:0.75rem; font-weight:600;">${u.fullName || 'N/A'}</td>
+                                    <td style="padding:0.75rem;">${u.email}</td>
+                                    <td style="padding:0.75rem;"><span class="badge badge-primary">${u.role}</span></td>
+                                    <td style="padding:0.75rem;">
+                                        <span class="badge ${u.isActive ? 'badge-success' : 'badge-danger'}">
+                                            ${u.isActive ? 'Active' : 'Inactive'}
+                                        </span>
+                                    </td>
+                                    <td style="padding:0.75rem;">
+                                        ${u.isActive ?
+                                            `<button class="btn btn-danger btn-sm" onclick="setUserStatus(${u.id || u.userId}, false)">Deactivate</button>` :
+                                            `<button class="btn btn-primary btn-sm" onclick="setUserStatus(${u.id || u.userId}, true)">Activate</button>`
+                                        }
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            } catch (err) {
+                container.innerHTML = `<p style="color:var(--danger)">${err.message}</p>`;
+            }
+        }
+
+        async function setUserStatus(userId, activate) {
+            try {
+                const endpoint = activate ? `/users/${userId}/activate` : `/users/${userId}/deactivate`;
+                await apiRequest(endpoint, { method: 'PATCH' });
+                showToast(`User account status updated.`, 'success');
+                loadUserAccounts();
+                loadDashboardSummary();
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        }
+
+        document.getElementById('admin-match-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const jobSeekerId = Number(document.getElementById('adm-js-id').value);
+            const vacancyId = Number(document.getElementById('adm-vac-id').value);
+
+            await inspectMatchScore(jobSeekerId, vacancyId);
+        });
+
+        async function inspectMatchScore(jobSeekerId, vacancyId) {
+            try {
+                const match = await apiRequest(`/matching/jobseeker/${jobSeekerId}/vacancy/${vacancyId}`);
+                const modal = document.getElementById('match-modal');
+                const body = document.getElementById('match-modal-body');
+
+                const overallScore = Number(match?.matchScore?.overallScore ?? match?.overallScore ?? 0);
+                const skillsScore = Number(match?.matchScore?.skillsScore ?? match?.skillsScore ?? 0);
+                const experienceScore = Number(match?.matchScore?.experienceScore ?? match?.experienceScore ?? 0);
+                const educationScore = Number(match?.matchScore?.educationScore ?? match?.educationScore ?? 0);
+                const locationScore = Number(match?.matchScore?.locationScore ?? match?.locationScore ?? 0);
+
+                let level = 'Low';
+                let scoreClass = 'match-low';
+
+                if (overallScore >= 70) {
+                    level = 'High';
+                    scoreClass = 'match-high';
+                } else if (overallScore >= 40) {
+                    level = 'Medium';
+                    scoreClass = 'match-med';
+                }
+
+                const matchedSkills = Array.isArray(match?.skillGap?.matchedSkills) ? match.skillGap.matchedSkills : [];
+                const missingSkills = Array.isArray(match?.skillGap?.missingSkills) ? match.skillGap.missingSkills : [];
+
+                const matchedSkillsHtml = matchedSkills.length > 0
+                    ? matchedSkills.map(skill => `<span class="badge badge-success" style="margin:0.2rem;">✓ ${skill}</span>`).join('')
+                    : '<span style="color:var(--text-muted); font-size:0.85rem;">No matched skills yet.</span>';
+
+                const missingSkillsHtml = missingSkills.length > 0
+                    ? missingSkills.map(skill => `<span class="badge badge-warning" style="margin:0.2rem;">! ${skill}</span>`).join('')
+                    : '<span style="color:var(--text-muted); font-size:0.85rem;">No missing skills identified.</span>';
+
+                body.innerHTML = `
+                    <div style="text-align:center; margin-bottom:1.5rem;">
+                        <div class="match-score-pill ${scoreClass}" style="font-size:1.5rem; padding:0.5rem 1.5rem;">
+                            Match Score: ${overallScore.toFixed(2)}%
+                        </div>
+                        <p style="color:var(--text-muted); font-size:0.85rem; margin-top:0.5rem;">
+                            Overall Compatibility: ${level}
+                        </p>
+                    </div>
+
+                    <h4>Deterministic Weight Breakdown:</h4>
+                    <ul style="margin:0.75rem 0 1.25rem 1.25rem; color:var(--text-muted); font-size:0.9rem; line-height:1.8;">
+                        <li>Skills Match Score (50% Weight): <strong>${skillsScore.toFixed(2)}%</strong></li>
+                        <li>Experience Match Score (25% Weight): <strong>${experienceScore.toFixed(2)}%</strong></li>
+                        <li>Education Match Score (15% Weight): <strong>${educationScore.toFixed(2)}%</strong></li>
+                        <li>Location Match Score (10% Weight): <strong>${locationScore.toFixed(2)}%</strong></li>
+                    </ul>
+
+                    <div style="margin-top:1rem; padding-top:1rem; border-top:1px solid var(--border-color);">
+                        <h4 style="margin-bottom:0.5rem;">Matched Skills</h4>
+                        <div style="display:flex; flex-wrap:wrap; gap:0.35rem;">${matchedSkillsHtml}</div>
+                    </div>
+
+                    <div style="margin-top:1rem;">
+                        <h4 style="margin-bottom:0.5rem;">Missing Skills / Skill Gap</h4>
+                        <div style="display:flex; flex-wrap:wrap; gap:0.35rem;">${missingSkillsHtml}</div>
+                    </div>
+                `;
+
+                modal.classList.add('active');
+            } catch (err) {
+                showToast(err.message || 'Unable to calculate match score.', 'error');
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('match-modal').classList.remove('active');
         }
     </script>
 </body>

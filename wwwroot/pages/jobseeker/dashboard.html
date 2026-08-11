@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Job Seeker Portal - Smart Recruitment Platform</title>
+    <title>Job Seeker Workspace - Smart Recruitment Platform</title>
     <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <div id="navbar-container"></div>
 
     <main class="container">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; flex-wrap:wrap; gap:1rem;">
             <div>
                 <h2>Job Seeker Workspace</h2>
-                <p style="color:var(--text-muted);">Manage your profile, CV, and track matching job vacancies</p>
+                <p style="color:var(--text-muted);">Manage your profile, qualifications, CV, applications, and contact requests</p>
             </div>
-            <div id="jobseeker-info" class="badge badge-primary" style="font-size:0.9rem; padding:0.5rem 1rem;">
+            <div id="jobseeker-info" class="badge badge-primary" style="font-size:0.9rem; padding:0.55rem 1.1rem;">
                 Loading Profile...
             </div>
         </div>
@@ -23,7 +23,8 @@
         <div class="tabs">
             <button class="tab-btn active" onclick="switchTab('jobs')">🔍 Explore Vacancies</button>
             <button class="tab-btn" onclick="switchTab('applications')">📋 My Applications</button>
-            <button class="tab-btn" onclick="switchTab('profile')">👤 My Profile & CV</button>
+            <button class="tab-btn" onclick="switchTab('profile')">👤 Profile & Qualifications</button>
+            <button class="tab-btn" onclick="switchTab('contacts')">📩 Contact Requests</button>
             <button class="tab-btn" onclick="switchTab('notifications')">🔔 Notifications</button>
         </div>
 
@@ -31,7 +32,7 @@
         <div id="tab-jobs" class="tab-content">
             <div class="card" style="margin-bottom:1.5rem; padding:1.25rem;">
                 <div style="display:grid; grid-template-columns: 2fr 1fr 1fr auto; gap:0.75rem; align-items:center;">
-                    <input type="text" id="search-kw" class="form-control" placeholder="Search by title or keywords...">
+                    <input type="text" id="search-kw" class="form-control" placeholder="Search title or keywords...">
                     <input type="text" id="search-loc" class="form-control" placeholder="Location...">
                     <input type="text" id="search-skills" class="form-control" placeholder="Skills (e.g. C#, SQL)...">
                     <button class="btn btn-primary" onclick="searchVacancies()">Search</button>
@@ -55,28 +56,34 @@
             </div>
         </div>
 
-        <!-- TAB 3: Profile & CV -->
+        <!-- TAB 3: Profile & Qualifications -->
         <div id="tab-profile" class="tab-content" style="display:none;">
-            <div class="grid grid-2">
+            <div class="grid grid-2" style="margin-bottom:1.5rem;">
+                <!-- Basic Info Form -->
                 <div class="card">
-                    <h3>Profile Information</h3>
+                    <h3>Personal Profile Details</h3>
                     <form id="profile-form" style="margin-top:1rem;">
                         <div class="form-group">
                             <label class="form-label">Full Name</label>
                             <input type="text" id="prof-name" class="form-control" required>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Phone</label>
+                            <label class="form-label">Phone Number</label>
                             <input type="text" id="prof-phone" class="form-control">
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Bio / Summary</label>
-                            <textarea id="prof-bio" class="form-control"></textarea>
+                            <label class="form-label">Location / City</label>
+                            <input type="text" id="prof-location" class="form-control" placeholder="e.g. Colombo">
                         </div>
-                        <button type="submit" class="btn btn-primary">Save Profile</button>
+                        <div class="form-group">
+                            <label class="form-label">Professional Summary</label>
+                            <textarea id="prof-bio" class="form-control" placeholder="Summarize your experience and career background..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Profile Details</button>
                     </form>
                 </div>
 
+                <!-- CV Section -->
                 <div class="card">
                     <h3>CV Document</h3>
                     <div id="cv-section" style="margin-top:1rem;">
@@ -85,16 +92,71 @@
 
                     <form id="cv-upload-form" style="margin-top:1.5rem; border-top:1px solid var(--border-color); padding-top:1.5rem;">
                         <div class="form-group">
-                            <label class="form-label">Upload New CV (PDF / DOC / DOCX)</label>
+                            <label class="form-label">Upload New CV (PDF / DOC / DOCX - Max 5MB)</label>
                             <input type="file" id="cv-file" class="form-control" accept=".pdf,.doc,.docx" required>
                         </div>
                         <button type="submit" class="btn btn-secondary btn-sm">Upload CV</button>
                     </form>
                 </div>
             </div>
+
+            <!-- Skills, Experience, Education Grid -->
+            <div class="grid grid-3">
+                <!-- Skills Card -->
+                <div class="card">
+                    <h3>My Skills</h3>
+                    <div id="skills-list" style="margin:1rem 0;">
+                        <p style="color:var(--text-muted);">Loading skills...</p>
+                    </div>
+                    <form id="add-skill-form" style="display:flex; gap:0.5rem; border-top:1px solid var(--border-color); padding-top:1rem;">
+                        <select id="skill-select" class="form-control" required style="flex:1;">
+                            <option value="">-- Select Skill --</option>
+                        </select>
+                        <button type="submit" class="btn btn-primary btn-sm">Add</button>
+                    </form>
+                </div>
+
+                <!-- Experience Card -->
+                <div class="card">
+                    <h3>Work Experience</h3>
+                    <div id="experience-list" style="margin:1rem 0;">
+                        <p style="color:var(--text-muted);">Loading experience...</p>
+                    </div>
+                    <form id="add-exp-form" style="border-top:1px solid var(--border-color); padding-top:1rem;">
+                        <input type="text" id="exp-title" class="form-control" placeholder="Job Title" required style="margin-bottom:0.5rem;">
+                        <input type="text" id="exp-company" class="form-control" placeholder="Company Name" required style="margin-bottom:0.5rem;">
+                        <input type="number" id="exp-years" class="form-control" placeholder="Years of Experience" required min="0" step="1" style="margin-bottom:0.5rem;">
+                        <button type="submit" class="btn btn-primary btn-sm" style="width:100%;">Add Experience</button>
+                    </form>
+                </div>
+
+                <!-- Education Card -->
+                <div class="card">
+                    <h3>Education Background</h3>
+                    <div id="education-list" style="margin:1rem 0;">
+                        <p style="color:var(--text-muted);">Loading education...</p>
+                    </div>
+                    <form id="add-edu-form" style="border-top:1px solid var(--border-color); padding-top:1rem;">
+                        <input type="text" id="edu-degree" class="form-control" placeholder="Degree / Qualification" required style="margin-bottom:0.5rem;">
+                        <input type="text" id="edu-inst" class="form-control" placeholder="Institution / University" required style="margin-bottom:0.5rem;">
+                        <button type="submit" class="btn btn-primary btn-sm" style="width:100%;">Add Education</button>
+                    </form>
+                </div>
+            </div>
         </div>
 
-        <!-- TAB 4: Notifications -->
+        <!-- TAB 4: Contact Requests -->
+        <div id="tab-contacts" class="tab-content" style="display:none;">
+            <div class="card">
+                <h3>Employer Contact Requests</h3>
+                <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:1rem;">Employers who matched with your profile can send you direct contact requests.</p>
+                <div id="contact-requests-list">
+                    <p style="color:var(--text-muted);">Loading contact requests...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 5: Notifications -->
         <div id="tab-notifications" class="tab-content" style="display:none;">
             <div class="card">
                 <h3>Notifications</h3>
@@ -108,7 +170,7 @@
     <!-- Modal for Match Details -->
     <div id="match-modal" class="modal-backdrop">
         <div class="modal">
-            <h3 id="match-modal-title">AI Match Score & Analysis</h3>
+            <h3 id="match-modal-title">Deterministic Candidate Match Score & Analysis</h3>
             <div id="match-modal-body" style="margin:1.5rem 0;"></div>
             <button class="btn btn-secondary" onclick="closeModal()">Close</button>
         </div>
@@ -117,6 +179,7 @@
     <script src="/js/api.js"></script>
     <script>
         let currentJobSeeker = null;
+        let masterSkills = [];
 
         document.addEventListener('DOMContentLoaded', async () => {
             renderNavbar('dashboard');
@@ -130,12 +193,16 @@
         async function initJobSeeker() {
             try {
                 currentJobSeeker = await apiRequest('/jobseekers/profile/me');
-                document.getElementById('jobseeker-info').textContent = `ID: ${currentJobSeeker.id} | ${currentJobSeeker.fullName || 'JobSeeker'}`;
+                const displayName = currentJobSeeker.fullName || currentJobSeeker.profile?.fullName || 'JobSeeker';
+                const jsId = currentJobSeeker.id || currentJobSeeker.jobSeekerId;
+                currentJobSeeker.id = jsId;
+                document.getElementById('jobseeker-info').textContent = `ID: ${jsId} | ${displayName}`;
                 populateProfileForm();
             } catch (err) {
                 console.warn('No existing jobseeker profile record:', err);
-                document.getElementById('jobseeker-info').textContent = 'Profile Setup Needed';
+                document.getElementById('jobseeker-info').textContent = 'Profile Active';
             }
+            loadMasterSkills();
             loadVacanciesList();
             loadCV();
         }
@@ -143,79 +210,87 @@
         function switchTab(tabName) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
-            
-            event.target.classList.add('active');
+
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
             document.getElementById(`tab-${tabName}`).style.display = 'block';
 
             if (tabName === 'jobs') loadVacanciesList();
-            if (tabName === 'applications') loadMyApplications();
-            if (tabName === 'notifications') loadNotifications();
+            else if (tabName === 'applications') loadMyApplications();
+            else if (tabName === 'profile') loadProfileQualifications();
+            else if (tabName === 'contacts') loadContactRequests();
+            else if (tabName === 'notifications') loadNotifications();
         }
 
-        async function loadVacanciesList() {
-            const list = document.getElementById('jobs-list');
+        async function loadMasterSkills() {
             try {
-                const vacancies = await apiRequest('/vacancy');
-                renderVacancies(vacancies);
+                masterSkills = await apiRequest('/skills');
+                const sel = document.getElementById('skill-select');
+                sel.innerHTML = '<option value="">-- Select Skill --</option>' +
+                    masterSkills.map(s => `<option value="${s.skillId}">${s.name}</option>`).join('');
             } catch (err) {
-                list.innerHTML = `<p style="color:var(--danger)">Error: ${err.message}</p>`;
+                console.error('Failed to load master skills:', err);
             }
         }
 
-        async function searchVacancies() {
-            const kw = document.getElementById('search-kw').value;
-            const loc = document.getElementById('search-loc').value;
-            const sk = document.getElementById('search-skills').value;
-            
+        async function loadVacanciesList(keyword = '') {
+            const list = document.getElementById('jobs-list');
             try {
+                const kw = document.getElementById('search-kw').value.trim();
+                const loc = document.getElementById('search-loc').value.trim();
+                const sk = document.getElementById('search-skills').value.trim();
+
+                let url = '/vacancy';
                 const params = new URLSearchParams();
                 if (kw) params.append('keyword', kw);
                 if (loc) params.append('location', loc);
                 if (sk) params.append('skills', sk);
 
-                const vacancies = await apiRequest(`/vacancy/search?${params.toString()}`);
-                renderVacancies(vacancies);
-            } catch (err) {
-                showToast(err.message, 'error');
-            }
-        }
+                if ([...params].length > 0) {
+                    url = `/vacancy/search?${params.toString()}`;
+                }
 
-        function renderVacancies(vacancies) {
-            const list = document.getElementById('jobs-list');
-            if (!vacancies || vacancies.length === 0) {
-                list.innerHTML = `<p style="grid-column:1/-1; text-align:center; color:var(--text-muted); padding:2rem;">No vacancies found.</p>`;
-                return;
-            }
+                const vacancies = await apiRequest(url);
 
-            list.innerHTML = vacancies.map(v => `
-                <div class="card" style="display:flex; flex-direction:column; justify-content:space-between;">
-                    <div>
-                        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.5rem;">
-                            <h4>${v.title}</h4>
-                            <span class="badge badge-primary">${v.vacancyType || 'Full-time'}</span>
+                if (!vacancies || vacancies.length === 0) {
+                    list.innerHTML = `<div class="card" style="grid-column:1/-1; text-align:center; padding:3rem; color:var(--text-muted);">
+                        No open job vacancies match your criteria.
+                    </div>`;
+                    return;
+                }
+
+                list.innerHTML = vacancies.map(v => `
+                    <div class="card card-interactive" style="display:flex; flex-direction:column; justify-space-between;">
+                        <div>
+                            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.5rem;">
+                                <h3 style="font-size:1.15rem;">${v.title}</h3>
+                                <span class="badge badge-primary">${v.vacancyType || 'Full-time'}</span>
+                            </div>
+                            <p style="font-size:0.88rem; color:var(--primary); font-weight:600; margin-bottom:0.25rem;">🏢 ${v.companyName || 'Employer'}</p>
+                            <p style="font-size:0.85rem; color:var(--text-dim); margin-bottom:0.75rem;">📍 ${v.location || 'Location Unspecified'} | 💼 Experience Req: ${v.experienceRequired ?? 0} Years</p>
+                            <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:1rem;">${v.description || ''}</p>
                         </div>
-                        <p style="font-size:0.85rem; color:var(--primary); font-weight:600;">🏢 ${v.companyName || 'Company'}</p>
-                        <p style="font-size:0.85rem; color:var(--text-dim); margin-bottom:0.75rem;">📍 ${v.location || 'Location unspecified'}</p>
-                        <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:1rem;">${v.description || ''}</p>
+                        <div>
+                            <div style="display:flex; gap:0.5rem; margin-top:1rem;">
+                                <button class="btn btn-outline btn-sm" style="flex:1;" onclick="viewMatchScore(${v.vacancyId})">📊 View Match Score</button>
+                                <button class="btn btn-primary btn-sm" style="flex:1;" onclick="applyToVacancy(${v.vacancyId})">Apply Now</button>
+                            </div>
+                        </div>
                     </div>
-                    <div style="display:flex; gap:0.5rem;">
-                        <button class="btn btn-primary btn-sm" onclick="applyToJob(${v.vacancyId})">Apply Now</button>
-                        ${currentJobSeeker ? `<button class="btn btn-secondary btn-sm" onclick="viewMatchScore(${v.vacancyId})">⚡ View AI Match</button>` : ''}
-                    </div>
-                </div>
-            `).join('');
+                `).join('');
+            } catch (err) {
+                list.innerHTML = `<div class="card" style="grid-column:1/-1; text-align:center; color:var(--danger);">Error loading vacancies: ${err.message}</div>`;
+            }
         }
 
-        async function applyToJob(vacancyId) {
-            if (!currentJobSeeker) {
-                showToast('Please complete your profile before applying.', 'warning');
-                return;
-            }
+        function searchVacancies() {
+            loadVacanciesList();
+        }
 
+        async function applyToVacancy(vacancyId) {
             try {
-                await apiRequest(`/applications/apply?jobSeekerId=${currentJobSeeker.id}&vacancyId=${vacancyId}`, {
-                    method: 'POST'
-                });
+                await apiRequest(`/Application/apply/${vacancyId}`, { method: 'POST' });
                 showToast('Application submitted successfully!', 'success');
             } catch (err) {
                 showToast(err.message, 'error');
@@ -223,33 +298,66 @@
         }
 
         async function viewMatchScore(vacancyId) {
-            if (!currentJobSeeker) return;
+            if (!currentJobSeeker || !currentJobSeeker.id) {
+                showToast('Job Seeker profile identity not found.', 'error');
+                return;
+            }
+
             try {
                 const match = await apiRequest(`/matching/jobseeker/${currentJobSeeker.id}/vacancy/${vacancyId}`);
                 const modal = document.getElementById('match-modal');
                 const body = document.getElementById('match-modal-body');
 
-                const scoreClass = match.totalScore >= 70 ? 'match-high' : match.totalScore >= 40 ? 'match-med' : 'match-low';
+                const overallScore = Number(match?.matchScore?.overallScore ?? match?.overallScore ?? 0);
+                const skillsScore = Number(match?.matchScore?.skillsScore ?? match?.skillsScore ?? 0);
+                const experienceScore = Number(match?.matchScore?.experienceScore ?? match?.experienceScore ?? 0);
+                const educationScore = Number(match?.matchScore?.educationScore ?? match?.educationScore ?? 0);
+                const locationScore = Number(match?.matchScore?.locationScore ?? match?.locationScore ?? 0);
+
+                const scoreClass = overallScore >= 70 ? 'match-high' : overallScore >= 40 ? 'match-med' : 'match-low';
+                const level = overallScore >= 70 ? 'High Match' : overallScore >= 40 ? 'Moderate Match' : 'Low Match';
+
+                const matchedSkills = Array.isArray(match?.skillGap?.matchedSkills) ? match.skillGap.matchedSkills : [];
+                const missingSkills = Array.isArray(match?.skillGap?.missingSkills) ? match.skillGap.missingSkills : [];
+
+                const matchedSkillsHtml = matchedSkills.length > 0 ?
+                    matchedSkills.map(s => `<span class="badge badge-success" style="margin:0.2rem;">✓ ${s}</span>`).join('') :
+                    '<span style="color:var(--text-muted); font-size:0.85rem;">No overlapping skills identified.</span>';
+
+                const missingSkillsHtml = missingSkills.length > 0 ?
+                    missingSkills.map(s => `<span class="badge badge-warning" style="margin:0.2rem;">! ${s}</span>`).join('') :
+                    '<span style="color:var(--text-muted); font-size:0.85rem;">All required skills matched!</span>';
 
                 body.innerHTML = `
                     <div style="text-align:center; margin-bottom:1.5rem;">
-                        <div class="match-score-pill ${scoreClass}" style="font-size:1.5rem; padding:0.5rem 1.5rem;">
-                            Match Score: ${match.totalScore}%
+                        <div class="match-score-pill ${scoreClass}" style="font-size:1.6rem; padding:0.6rem 1.75rem;">
+                            Match Score: ${overallScore.toFixed(1)}%
                         </div>
-                        <p style="color:var(--text-muted); font-size:0.85rem; margin-top:0.5rem;">Level: ${match.matchLevel}</p>
+                        <p style="color:var(--text-muted); font-size:0.9rem; margin-top:0.5rem;">Compatibility: <strong>${level}</strong></p>
                     </div>
 
-                    <h4>Breakdown:</h4>
-                    <ul style="margin:0.75rem 0 1rem 1.25rem; color:var(--text-muted); font-size:0.9rem;">
-                        <li>Skill Weight Match Score: <strong>${match.skillScore}%</strong></li>
-                        <li>Experience Match Score: <strong>${match.experienceScore}%</strong></li>
-                        <li>Education Match Score: <strong>${match.educationScore}%</strong></li>
+                    <h4 style="margin-bottom:0.5rem;">Deterministic Weight Breakdown:</h4>
+                    <ul style="margin:0 0 1.25rem 1.25rem; color:var(--text-muted); font-size:0.9rem; line-height:1.8;">
+                        <li>Skills Score (50% Weight): <strong>${skillsScore.toFixed(1)}%</strong></li>
+                        <li>Experience Score (25% Weight): <strong>${experienceScore.toFixed(1)}%</strong></li>
+                        <li>Education Score (15% Weight): <strong>${educationScore.toFixed(1)}%</strong></li>
+                        <li>Location Score (10% Weight): <strong>${locationScore.toFixed(1)}%</strong></li>
                     </ul>
+
+                    <div style="margin-top:1rem; padding-top:1rem; border-top:1px solid var(--border-color);">
+                        <h4 style="margin-bottom:0.5rem;">Matched Required Skills</h4>
+                        <div style="display:flex; flex-wrap:wrap; gap:0.35rem;">${matchedSkillsHtml}</div>
+                    </div>
+
+                    <div style="margin-top:1rem;">
+                        <h4 style="margin-bottom:0.5rem;">Skill Gap / Missing Skills</h4>
+                        <div style="display:flex; flex-wrap:wrap; gap:0.35rem;">${missingSkillsHtml}</div>
+                    </div>
                 `;
 
                 modal.classList.add('active');
             } catch (err) {
-                showToast(err.message, 'error');
+                showToast(err.message || 'Unable to fetch match score.', 'error');
             }
         }
 
@@ -259,15 +367,10 @@
 
         async function loadMyApplications() {
             const list = document.getElementById('applications-list');
-            if (!currentJobSeeker) {
-                list.innerHTML = `<p style="color:var(--text-muted);">Please create your profile first.</p>`;
-                return;
-            }
-
             try {
-                const apps = await apiRequest(`/applications/jobseeker/${currentJobSeeker.id}`);
+                const apps = await apiRequest('/Application/my-applications');
                 if (!apps || apps.length === 0) {
-                    list.innerHTML = `<p style="color:var(--text-muted);">You haven't submitted any applications yet.</p>`;
+                    list.innerHTML = `<p style="color:var(--text-muted);">You have not submitted any applications yet.</p>`;
                     return;
                 }
 
@@ -275,16 +378,18 @@
                     <table style="width:100%; border-collapse:collapse; text-align:left; font-size:0.9rem;">
                         <thead>
                             <tr style="border-bottom:1px solid var(--border-color); color:var(--text-muted);">
-                                <th style="padding:0.75rem;">Vacancy ID</th>
+                                <th style="padding:0.75rem;">Application ID</th>
+                                <th style="padding:0.75rem;">Vacancy</th>
                                 <th style="padding:0.75rem;">Applied Date</th>
                                 <th style="padding:0.75rem;">Status</th>
                             </tr>
                         </thead>
                         <tbody>
                             ${apps.map(a => `
-                                <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
-                                    <td style="padding:0.75rem;">Vacancy #${a.vacancyId}</td>
-                                    <td style="padding:0.75rem;">${new Date(a.appliedDate).toLocaleDateString()}</td>
+                                <tr style="border-bottom:1px solid var(--border-color);">
+                                    <td style="padding:0.75rem;">#${a.applicationId || a.id}</td>
+                                    <td style="padding:0.75rem; font-weight:600;">${a.vacancyTitle || 'Vacancy #' + a.vacancyId}</td>
+                                    <td style="padding:0.75rem;">${a.appliedDate ? new Date(a.appliedDate).toLocaleDateString() : 'N/A'}</td>
                                     <td style="padding:0.75rem;">
                                         <span class="badge ${a.status === 'Accepted' ? 'badge-success' : a.status === 'Rejected' ? 'badge-danger' : 'badge-warning'}">
                                             ${a.status}
@@ -302,50 +407,193 @@
 
         function populateProfileForm() {
             if (!currentJobSeeker) return;
-            document.getElementById('prof-name').value = currentJobSeeker.fullName || '';
-            document.getElementById('prof-phone').value = currentJobSeeker.phoneNumber || '';
-            document.getElementById('prof-bio').value = currentJobSeeker.summary || '';
+            document.getElementById('prof-name').value = currentJobSeeker.fullName || currentJobSeeker.profile?.fullName || '';
+            document.getElementById('prof-phone').value = currentJobSeeker.phoneNumber || currentJobSeeker.profile?.phoneNumber || '';
+            document.getElementById('prof-location').value = currentJobSeeker.location || currentJobSeeker.profile?.location || '';
+            document.getElementById('prof-bio').value = currentJobSeeker.summary || currentJobSeeker.profile?.summary || '';
         }
 
         document.getElementById('profile-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const fullName = document.getElementById('prof-name').value.trim();
             const phoneNumber = document.getElementById('prof-phone').value.trim();
+            const location = document.getElementById('prof-location').value.trim();
             const summary = document.getElementById('prof-bio').value.trim();
 
             try {
-                if (currentJobSeeker) {
+                if (currentJobSeeker && currentJobSeeker.id) {
                     await apiRequest(`/jobseekers/profile/${currentJobSeeker.id}`, {
                         method: 'PUT',
-                        body: { fullName, phoneNumber, summary }
+                        body: { fullName, phoneNumber, location, summary }
                     });
                     showToast('Profile updated successfully!', 'success');
-                } else {
-                    const created = await apiRequest(`/jobseekers/profile/1`, {
-                        method: 'POST',
-                        body: { fullName, phoneNumber, summary }
-                    });
-                    currentJobSeeker = created;
-                    showToast('Profile created successfully!', 'success');
                 }
             } catch (err) {
                 showToast(err.message, 'error');
             }
         });
 
+        async function loadProfileQualifications() {
+            if (!currentJobSeeker || !currentJobSeeker.id) return;
+
+            // Load Skills
+            try {
+                const skills = await apiRequest(`/jobseekers/${currentJobSeeker.id}/skills`);
+                const sList = document.getElementById('skills-list');
+                if (!skills || skills.length === 0) {
+                    sList.innerHTML = `<p style="color:var(--text-muted); font-size:0.85rem;">No skills added yet.</p>`;
+                } else {
+                    sList.innerHTML = skills.map(s => `
+                        <div style="display:flex; justify-content:space-between; align-items:center; padding:0.4rem 0.6rem; background:var(--primary-light); border-radius:var(--radius-sm); margin-bottom:0.4rem;">
+                            <span style="font-weight:600; font-size:0.85rem;">⚡ ${s.skillName || s.name || 'Skill #' + s.skillId}</span>
+                            <button class="btn btn-danger btn-sm" onclick="deleteJobSeekerSkill(${s.jobSeekerSkillId || s.id})">✕</button>
+                        </div>
+                    `).join('');
+                }
+            } catch (err) {
+                document.getElementById('skills-list').innerHTML = `<p style="color:var(--danger); font-size:0.85rem;">${err.message}</p>`;
+            }
+
+            // Load Experience
+            try {
+                const exps = await apiRequest(`/jobseekers/${currentJobSeeker.id}/experiences`);
+                const eList = document.getElementById('experience-list');
+                if (!exps || exps.length === 0) {
+                    eList.innerHTML = `<p style="color:var(--text-muted); font-size:0.85rem;">No experience added yet.</p>`;
+                } else {
+                    eList.innerHTML = exps.map(e => `
+                        <div style="padding:0.5rem; border-bottom:1px solid var(--border-color); font-size:0.85rem; display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <strong>${e.jobTitle}</strong> at ${e.companyName}
+                                <div style="color:var(--text-muted); font-size:0.78rem;">${e.yearsOfExperience} Years</div>
+                            </div>
+                            <button class="btn btn-danger btn-sm" onclick="deleteExperience(${e.experienceId || e.id})">✕</button>
+                        </div>
+                    `).join('');
+                }
+            } catch (err) {
+                document.getElementById('experience-list').innerHTML = `<p style="color:var(--danger); font-size:0.85rem;">${err.message}</p>`;
+            }
+
+            // Load Education
+            try {
+                const edus = await apiRequest(`/jobseekers/${currentJobSeeker.id}/educations`);
+                const edList = document.getElementById('education-list');
+                if (!edus || edus.length === 0) {
+                    edList.innerHTML = `<p style="color:var(--text-muted); font-size:0.85rem;">No education records yet.</p>`;
+                } else {
+                    edList.innerHTML = edus.map(ed => `
+                        <div style="padding:0.5rem; border-bottom:1px solid var(--border-color); font-size:0.85rem; display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <strong>${ed.degree}</strong>
+                                <div style="color:var(--text-muted); font-size:0.78rem;">${ed.institution}</div>
+                            </div>
+                            <button class="btn btn-danger btn-sm" onclick="deleteEducation(${ed.educationId || ed.id})">✕</button>
+                        </div>
+                    `).join('');
+                }
+            } catch (err) {
+                document.getElementById('education-list').innerHTML = `<p style="color:var(--danger); font-size:0.85rem;">${err.message}</p>`;
+            }
+        }
+
+        document.getElementById('add-skill-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const skillId = Number(document.getElementById('skill-select').value);
+            if (!skillId) return;
+
+            try {
+                await apiRequest(`/jobseekers/${currentJobSeeker.id}/skills`, {
+                    method: 'POST',
+                    body: { skillId }
+                });
+                showToast('Skill added successfully!', 'success');
+                loadProfileQualifications();
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        });
+
+        async function deleteJobSeekerSkill(skillId) {
+            try {
+                await apiRequest(`/jobseekers/${currentJobSeeker.id}/skills/${skillId}`, { method: 'DELETE' });
+                showToast('Skill removed.', 'info');
+                loadProfileQualifications();
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        }
+
+        document.getElementById('add-exp-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const jobTitle = document.getElementById('exp-title').value.trim();
+            const companyName = document.getElementById('exp-company').value.trim();
+            const yearsOfExperience = Number(document.getElementById('exp-years').value);
+
+            try {
+                await apiRequest(`/jobseekers/${currentJobSeeker.id}/experiences`, {
+                    method: 'POST',
+                    body: { jobTitle, companyName, yearsOfExperience }
+                });
+                showToast('Experience record added!', 'success');
+                document.getElementById('add-exp-form').reset();
+                loadProfileQualifications();
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        });
+
+        async function deleteExperience(expId) {
+            try {
+                await apiRequest(`/jobseekers/${currentJobSeeker.id}/experiences/${expId}`, { method: 'DELETE' });
+                showToast('Experience removed.', 'info');
+                loadProfileQualifications();
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        }
+
+        document.getElementById('add-edu-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const degree = document.getElementById('edu-degree').value.trim();
+            const institution = document.getElementById('edu-inst').value.trim();
+
+            try {
+                await apiRequest(`/jobseekers/${currentJobSeeker.id}/educations`, {
+                    method: 'POST',
+                    body: { degree, institution }
+                });
+                showToast('Education record added!', 'success');
+                document.getElementById('add-edu-form').reset();
+                loadProfileQualifications();
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        });
+
+        async function deleteEducation(eduId) {
+            try {
+                await apiRequest(`/jobseekers/${currentJobSeeker.id}/educations/${eduId}`, { method: 'DELETE' });
+                showToast('Education removed.', 'info');
+                loadProfileQualifications();
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        }
+
         async function loadCV() {
             const section = document.getElementById('cv-section');
-            if (!currentJobSeeker) {
-                section.innerHTML = `<p style="color:var(--text-muted);">Please create your profile first to upload a CV.</p>`;
+            if (!currentJobSeeker || !currentJobSeeker.id) {
+                section.innerHTML = `<p style="color:var(--text-muted);">Please save your profile first to manage CV.</p>`;
                 return;
             }
 
             try {
                 const cv = await apiRequest(`/jobseekers/cv/${currentJobSeeker.id}`);
                 section.innerHTML = `
-                    <div style="background:var(--bg-input); padding:1rem; border-radius:var(--radius-md);">
-                        <p style="font-weight:600; color:var(--success);">📄 CV Uploaded</p>
-                        <p style="font-size:0.85rem; color:var(--text-muted); margin-top:0.25rem;">File: ${cv.fileName || 'Attached CV'}</p>
+                    <div style="background:var(--bg-input); padding:1rem; border-radius:var(--radius-md); border:1px solid var(--border-color);">
+                        <p style="font-weight:600; color:var(--success);">📄 Attached CV File</p>
+                        <p style="font-size:0.85rem; color:var(--text-muted); margin-top:0.25rem;">${cv.fileName || 'CV Document'}</p>
                     </div>
                 `;
             } catch (err) {
@@ -355,8 +603,8 @@
 
         document.getElementById('cv-upload-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (!currentJobSeeker) {
-                showToast('Please create profile before uploading CV.', 'warning');
+            if (!currentJobSeeker || !currentJobSeeker.id) {
+                showToast('Please save profile before uploading CV.', 'warning');
                 return;
             }
 
@@ -378,6 +626,54 @@
             }
         });
 
+        async function loadContactRequests() {
+            const list = document.getElementById('contact-requests-list');
+            try {
+                const requests = await apiRequest('/contactrequest/jobseeker');
+                if (!requests || requests.length === 0) {
+                    list.innerHTML = `<p style="color:var(--text-muted);">No contact requests received yet.</p>`;
+                    return;
+                }
+
+                list.innerHTML = `
+                    <div style="display:flex; flex-direction:column; gap:1rem;">
+                        ${requests.map(r => `
+                            <div style="padding:1rem; border:1px solid var(--border-color); border-radius:var(--radius-md); background:var(--bg-card);">
+                                <div style="display:flex; justify-content:space-between; align-items:center;">
+                                    <strong>Employer / Company Contact Request</strong>
+                                    <span class="badge ${r.status === 'Accepted' || r.status === 1 ? 'badge-success' : r.status === 'Declined' || r.status === 2 ? 'badge-danger' : 'badge-warning'}">
+                                        ${r.status === 1 ? 'Accepted' : r.status === 2 ? 'Declined' : (r.status || 'Pending')}
+                                    </span>
+                                </div>
+                                <p style="font-size:0.9rem; color:var(--text-muted); margin:0.5rem 0;">${r.message || 'The employer would like to get in touch regarding potential job opportunities.'}</p>
+                                ${ (r.status === 'Pending' || r.status === 0) ? `
+                                    <div style="display:flex; gap:0.5rem; margin-top:0.75rem;">
+                                        <button class="btn btn-primary btn-sm" onclick="respondContactRequest(${r.requestId || r.id}, 1)">Accept Contact</button>
+                                        <button class="btn btn-secondary btn-sm" onclick="respondContactRequest(${r.requestId || r.id}, 2)">Decline</button>
+                                    </div>
+                                ` : '' }
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } catch (err) {
+                list.innerHTML = `<p style="color:var(--danger)">${err.message}</p>`;
+            }
+        }
+
+        async function respondContactRequest(requestId, responseEnum) {
+            try {
+                await apiRequest(`/contactrequest/${requestId}/respond`, {
+                    method: 'PUT',
+                    body: { response: responseEnum }
+                });
+                showToast(`Contact request updated!`, 'success');
+                loadContactRequests();
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        }
+
         async function loadNotifications() {
             const list = document.getElementById('notifications-list');
             try {
@@ -388,9 +684,10 @@
                 }
 
                 list.innerHTML = notifs.map(n => `
-                    <div style="padding:0.75rem 1rem; border-bottom:1px solid var(--border-color); background:${n.isRead ? 'transparent' : 'rgba(99,102,241,0.1)'};">
-                        <strong>${n.title}</strong>
+                    <div style="padding:0.75rem 1rem; border-bottom:1px solid var(--border-color); background:${n.isRead ? 'transparent' : 'var(--primary-light)'};">
+                        <strong>${n.title || 'Notification'}</strong>
                         <p style="font-size:0.88rem; color:var(--text-muted); margin-top:0.25rem;">${n.message}</p>
+                        <span style="font-size:0.75rem; color:var(--text-dim);">${n.createdAt ? new Date(n.createdAt).toLocaleString() : ''}</span>
                     </div>
                 `).join('');
             } catch (err) {

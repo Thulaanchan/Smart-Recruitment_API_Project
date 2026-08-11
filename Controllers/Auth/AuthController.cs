@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SmartRecruitmentMatchingPlatform.Interfaces.Services;
 using SmartRecruitmentMatchingPlatform.Interfaces.Services.Auth;
@@ -59,9 +59,16 @@ namespace SmartRecruitmentMatchingPlatform.Controllers.Auth
 
                 return Ok(result);
             }
-            catch (InvalidOperationException ex)
+            catch (UnauthorizedAccessException ex)
             {
                 return Unauthorized(new
+                {
+                    message = ex.Message
+                });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new
                 {
                     message = ex.Message
                 });
@@ -83,6 +90,13 @@ namespace SmartRecruitmentMatchingPlatform.Controllers.Auth
                     await _authService.RefreshTokenAsync(dto);
 
                 return Ok(result);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new
+                {
+                    message = ex.Message
+                });
             }
             catch (InvalidOperationException ex)
             {
@@ -135,6 +149,13 @@ namespace SmartRecruitmentMatchingPlatform.Controllers.Auth
                 {
                     message =
                         "Password changed successfully."
+                });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new
+                {
+                    message = ex.Message
                 });
             }
             catch (InvalidOperationException ex)

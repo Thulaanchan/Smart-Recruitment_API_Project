@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - Smart Recruitment Matching Platform</title>
     <link rel="stylesheet" href="/css/styles.css">
+
     <style>
         .auth-container {
             max-width: 480px;
@@ -28,97 +29,352 @@
             transition: all 0.2s ease;
         }
 
-        .role-option.active {
-            border-color: var(--primary);
-            background: var(--primary-light);
-            color: var(--primary);
-        }
+            .role-option.active {
+                border-color: var(--primary);
+                background: var(--primary-light);
+                color: var(--primary);
+            }
     </style>
 </head>
+
 <body>
+
     <div id="navbar-container"></div>
 
     <main class="container">
+
         <div class="auth-container">
+
             <div class="card">
+
                 <div style="text-align:center; margin-bottom:1.5rem;">
                     <h2>Create an Account</h2>
-                    <p style="color:var(--text-muted); font-size:0.9rem;">Join the intelligent recruitment platform</p>
+
+                    <p style="
+                        color:var(--text-muted);
+                        font-size:0.9rem;">
+                        Join the Smart Recruitment Matching Platform
+                    </p>
                 </div>
+
+                <!-- ROLE SELECTION -->
 
                 <div class="role-selector">
-                    <div class="role-option active" id="opt-jobseeker" onclick="selectRole('JobSeeker')">
+
+                    <div class="role-option active"
+                         id="opt-jobseeker"
+                         onclick="selectRole(1)">
+
                         👨‍💻 Job Seeker
                     </div>
-                    <div class="role-option" id="opt-employer" onclick="selectRole('Employer')">
+
+                    <div class="role-option"
+                         id="opt-employer"
+                         onclick="selectRole(2)">
+
                         🏢 Employer
                     </div>
+
                 </div>
+
+                <!-- REGISTER FORM -->
 
                 <form id="register-form">
-                    <input type="hidden" id="role" value="JobSeeker">
+
+                    <!--
+                        Backend UserRole enum:
+                        1 = JobSeeker
+                        2 = Employer
+                        3 = Administrator
+
+                        Administrator is intentionally NOT available
+                        for public registration.
+                    -->
+
+                    <input type="hidden"
+                           id="role"
+                           value="1">
 
                     <div class="form-group">
-                        <label class="form-label" for="username">Username</label>
-                        <input type="text" id="username" class="form-control" placeholder="Choose a username" required>
+
+                        <label class="form-label"
+                               for="fullName">
+
+                            Full Name
+                        </label>
+
+                        <input type="text"
+                               id="fullName"
+                               class="form-control"
+                               placeholder="Enter your full name"
+                               maxlength="100"
+                               required>
+
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label" for="email">Email Address</label>
-                        <input type="email" id="email" class="form-control" placeholder="name@example.com" required>
+
+                        <label class="form-label"
+                               for="email">
+
+                            Email Address
+                        </label>
+
+                        <input type="email"
+                               id="email"
+                               class="form-control"
+                               placeholder="name@example.com"
+                               maxlength="150"
+                               required>
+
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label" for="password">Password</label>
-                        <input type="password" id="password" class="form-control" placeholder="Minimum 6 characters" required>
+
+                        <label class="form-label"
+                               for="password">
+
+                            Password
+                        </label>
+
+                        <input type="password"
+                               id="password"
+                               class="form-control"
+                               placeholder="Minimum 8 characters"
+                               minlength="8"
+                               required>
+
                     </div>
 
-                    <button type="submit" class="btn btn-primary" style="width:100%; margin-top:1rem;">Register Now</button>
+                    <button type="submit"
+                            id="register-button"
+                            class="btn btn-primary"
+                            style="
+                            width:100%;
+                            margin-top:1rem;">
+
+                        Register Now
+                    </button>
+
                 </form>
 
-                <div style="text-align:center; margin-top:1.5rem; font-size:0.9rem; color:var(--text-muted);">
-                    Already have an account? <a href="/pages/auth/login.html">Sign in</a>
+                <div style="
+                    text-align:center;
+                    margin-top:1.5rem;
+                    font-size:0.9rem;
+                    color:var(--text-muted);">
+
+                    Already have an account?
+
+                    <a href="/pages/auth/login.html">
+                        Sign in
+                    </a>
+
                 </div>
+
             </div>
+
         </div>
+
     </main>
 
     <script src="/js/api.js"></script>
+
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            renderNavbar();
-            const urlParams = new URLSearchParams(window.location.search);
-            const role = urlParams.get('role');
-            if (role === 'Employer') {
-                selectRole('Employer');
+
+        document.addEventListener(
+            'DOMContentLoaded',
+            () => {
+
+                renderNavbar();
+
+                const urlParams =
+                    new URLSearchParams(
+                        window.location.search
+                    );
+
+                const requestedRole =
+                    urlParams.get('role');
+
+                if (requestedRole === 'Employer') {
+                    selectRole(2);
+                } else {
+                    selectRole(1);
+                }
             }
-        });
+        );
+
 
         function selectRole(role) {
-            document.getElementById('role').value = role;
-            document.getElementById('opt-jobseeker').classList.toggle('active', role === 'JobSeeker');
-            document.getElementById('opt-employer').classList.toggle('active', role === 'Employer');
+
+            document.getElementById('role').value =
+                role.toString();
+
+            document
+                .getElementById('opt-jobseeker')
+                .classList
+                .toggle(
+                    'active',
+                    role === 1
+                );
+
+            document
+                .getElementById('opt-employer')
+                .classList
+                .toggle(
+                    'active',
+                    role === 2
+                );
         }
 
-        document.getElementById('register-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const username = document.getElementById('username').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
-            const role = document.getElementById('role').value;
 
-            try {
-                await apiRequest('/Auth/register', {
-                    method: 'POST',
-                    body: { username, email, password, role }
-                });
+        document
+            .getElementById('register-form')
+            .addEventListener(
+                'submit',
+                async (event) => {
 
-                showToast('Registration successful! Please sign in.', 'success');
-                setTimeout(() => window.location.href = '/pages/auth/login.html', 1200);
-            } catch (err) {
-                showToast(err.message, 'error');
-            }
-        });
+                    event.preventDefault();
+
+                    const registerButton =
+                        document.getElementById(
+                            'register-button'
+                        );
+
+                    const fullName =
+                        document.getElementById(
+                            'fullName'
+                        ).value.trim();
+
+                    const email =
+                        document.getElementById(
+                            'email'
+                        ).value.trim();
+
+                    const password =
+                        document.getElementById(
+                            'password'
+                        ).value;
+
+                    const role =
+                        Number(
+                            document.getElementById(
+                                'role'
+                            ).value
+                        );
+
+
+                    if (!fullName) {
+
+                        showToast(
+                            'Full name is required.',
+                            'error'
+                        );
+
+                        return;
+                    }
+
+
+                    if (!email) {
+
+                        showToast(
+                            'Email address is required.',
+                            'error'
+                        );
+
+                        return;
+                    }
+
+
+                    if (password.length < 8) {
+
+                        showToast(
+                            'Password must contain at least 8 characters.',
+                            'error'
+                        );
+
+                        return;
+                    }
+
+
+                    if (role !== 1 && role !== 2) {
+
+                        showToast(
+                            'Please select a valid account type.',
+                            'error'
+                        );
+
+                        return;
+                    }
+
+
+                    try {
+
+                        registerButton.disabled = true;
+                        registerButton.textContent =
+                            'Creating Account...';
+
+
+                        /*
+                            IMPORTANT:
+
+                            This payload matches
+                            RegisterRequestDto exactly:
+
+                            FullName
+                            Email
+                            Password
+                            Role
+                        */
+
+                        await apiRequest(
+                            '/auth/register',
+                            {
+                                method: 'POST',
+
+                                body: {
+                                    fullName: fullName,
+                                    email: email,
+                                    password: password,
+                                    role: role
+                                }
+                            }
+                        );
+
+
+                        showToast(
+                            'Registration successful! Please sign in.',
+                            'success'
+                        );
+
+
+                        setTimeout(
+                            () => {
+
+                                window.location.href =
+                                    '/pages/auth/login.html';
+
+                            },
+                            1200
+                        );
+
+                    }
+                    catch (error) {
+
+                        showToast(
+                            error.message ||
+                            'Registration failed.',
+                            'error'
+                        );
+
+                        registerButton.disabled = false;
+                        registerButton.textContent =
+                            'Register Now';
+                    }
+                }
+            );
+
     </script>
+
 </body>
 </html>
